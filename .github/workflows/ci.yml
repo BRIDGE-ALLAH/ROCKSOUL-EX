@@ -48,7 +48,7 @@ jobs:
         with:
           node-version: 22
       - name: Install pinned packager
-        run: npm install --no-save --package-lock=false @vscode/vsce@4.0.2
+        run: npm install --no-save --package-lock=false @vscode/vsce@4.1.0
       - name: Package extension
         run: |
           mkdir -p dist
