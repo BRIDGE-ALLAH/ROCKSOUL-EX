@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1800" viewBox="0 0 1400 1800">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#080a0d"/><stop offset=".52" stop-color="#11151a"/><stop offset="1" stop-color="#050608"/></linearGradient>
+  <radialGradient id="moon" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#f4eee1" stop-opacity=".95"/><stop offset=".58" stop-color="#bec4c7" stop-opacity=".28"/><stop offset="1" stop-color="#8fc8d4" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse"><path d="M42 0H0V42" fill="none" stroke="#d8e0e0" stroke-opacity=".08" stroke-width="1"/></pattern>
+  <pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#e7e0d5" opacity=".48"/></pattern>
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .13"/></feComponentTransfer><feBlend in="SourceGraphic" mode="screen"/></filter>
+  <filter id="glow"><feGaussianBlur stdDeviation="22" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <clipPath id="circleClip"><circle cx="1010" cy="565" r="300"/></clipPath>
+</defs>
+<rect width="1400" height="1800" fill="url(#bg)"/>
+<rect width="1400" height="1800" fill="url(#grid)" opacity=".65"/>
+<path d="M64 64H1336V1736H64Z" fill="none" stroke="#d8dfde" stroke-opacity=".32" stroke-width="2"/>
+<path d="M64 160H1336M64 1630H1336" stroke="#d8dfde" stroke-opacity=".18"/>
+<g stroke="#e7e0d5" stroke-opacity=".5" stroke-width="2"><path d="M64 100h48M88 64v48M1288 64v48M1336 100h-48M64 1700h48M88 1736v-48M1288 1736v-48M1336 1700h-48"/></g>
+<circle cx="1010" cy="565" r="360" fill="url(#moon)" opacity=".56" filter="url(#glow)"/>
+<circle cx="1010" cy="565" r="290" fill="none" stroke="#e8e2d8" stroke-opacity=".62" stroke-width="2"/>
+<circle cx="1010" cy="565" r="326" fill="none" stroke="#8fc8d4" stroke-opacity=".5" stroke-width="2" stroke-dasharray="4 12"/>
+<circle cx="1010" cy="565" r="250" fill="none" stroke="#e8e2d8" stroke-opacity=".18" stroke-width="1"/>
+<g clip-path="url(#circleClip)" opacity=".85">
+<path d="M700 860L1165 250M735 900L1200 290M770 940L1235 330M805 980L1270 370M840 1020L1305 410" stroke="#e9e2d7" stroke-opacity=".24" stroke-width="4"/>
+<path d="M700 510L1310 510M700 565L1310 565M700 620L1310 620" stroke="#8fc8d4" stroke-opacity=".22" stroke-width="2"/>
+<path d="M1010 245V885M950 245V885M1070 245V885" stroke="#8fc8d4" stroke-opacity=".16" stroke-width="2"/>
+</g>
+<g transform="translate(1010 600)">
+<path d="M-142 340L-115 -70Q-96 -185 -5 -205Q90 -196 118 -78L145 340Z" fill="#080a0d" stroke="#d9e1df" stroke-opacity=".74" stroke-width="3"/>
+<path d="M-116 340L-90 -57Q-72 -156 -5 -173Q65 -156 91 -58L117 340" fill="none" stroke="#8fc8d4" stroke-opacity=".8" stroke-width="3"/>
+<path d="M-88 340L-65 -50Q-44 -120 -4 -130Q38 -120 62 -50L86 340" fill="none" stroke="#e9e2d7" stroke-opacity=".42" stroke-width="2" stroke-dasharray="8 12"/>
+<path d="M-142 90H145M-132 170H135M-126 250H128" stroke="#e9e2d7" stroke-opacity=".28" stroke-width="2"/>
+<path d="M-6 -170V335M-90 -50L-6 45L90 -50" stroke="#ef704b" stroke-opacity=".86" stroke-width="3" fill="none"/>
+<circle cx="-6" cy="45" r="8" fill="#ef704b"/>
+<path d="M-180 340H180" stroke="#e9e2d7" stroke-opacity=".7" stroke-width="3"/>
+</g>
+<g fill="none" stroke="#8fc8d4" stroke-opacity=".8" stroke-width="2"><path d="M1010 166V232M1010 898V964M610 565H674M1346 565H1410"/><circle cx="1010" cy="565" r="12"/><path d="M1000 565h20M1010 555v20"/></g>
+<g font-family="monospace" font-size="16" letter-spacing="3" fill="#a8c6cc"><text x="730" y="292">WITNESS / 01</text><text x="1170" y="870">NO FACE. NO NOISE.</text><text x="700" y="946">PROJECT SIGNAL // ACTIVE</text></g>
+<g font-family="Arial, sans-serif" font-weight="900" fill="#f2eee5">
+<text x="100" y="230" font-size="27" letter-spacing="5">BRIDGE-ALLAH PRESENTS / ENGINEERING TOOLING</text>
+<text x="90" y="560" font-size="178" letter-spacing="-9">ROCK</text>
+<text x="90" y="716" font-size="178" letter-spacing="-9">SOUL</text>
+<text x="90" y="866" font-size="190" letter-spacing="-10" fill="#ef704b">-EX</text>
+</g>
+<path d="M92 900H610" stroke="#ef704b" stroke-width="8"/>
+<text x="100" y="970" font-family="monospace" font-size="28" letter-spacing="5" fill="#e8e2d8">THE ENGINEERING EXPERIENCE</text>
+<text x="100" y="1040" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#f2eee5">YOUR REPOSITORY HAS A STORY.</text>
+<text x="100" y="1095" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#f2eee5">DON'T LOSE ITS DIRECTION.</text>
+<g transform="translate(100 1210)" font-family="monospace">
+<path d="M0 0H1190" stroke="#d9e1df" stroke-opacity=".55" stroke-width="2"/>
+<g fill="#ef704b"><circle cx="0" cy="0" r="8"/><circle cx="395" cy="0" r="8"/><circle cx="790" cy="0" r="8"/><circle cx="1190" cy="0" r="8"/></g>
+<g fill="#f2eee5" font-size="23" letter-spacing="2"><text x="0" y="58">01 / OBSERVE</text><text x="395" y="58">02 / UNDERSTAND</text><text x="790" y="58">03 / BUILD</text><text x="1190" y="58" text-anchor="end">04 / VERIFY</text></g>
+<g fill="#aab3b5" font-size="14" letter-spacing="1.5"><text x="0" y="94">READ THE PROJECT</text><text x="395" y="94">KEEP THE CONTEXT</text><text x="790" y="94">MAKE REAL CHANGES</text><text x="1190" y="94" text-anchor="end">SHOW THE PROOF</text></g>
+</g>
+<g transform="translate(100 1425)">
+<rect x="0" y="0" width="1190" height="150" fill="#e8e2d8" fill-opacity=".055" stroke="#d9e1df" stroke-opacity=".42"/>
+<text x="28" y="52" font-family="monospace" font-size="19" letter-spacing="3" fill="#8fc8d4">SILENT BY DEFAULT / USEFUL BY DESIGN / HONEST BY EVIDENCE</text>
+<text x="28" y="105" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#f2eee5">NOT ANOTHER AI CODING ASSISTANT.</text>
+<text x="28" y="136" font-family="monospace" font-size="16" letter-spacing="2" fill="#c2c8c5">A COMPANION FOR THE WHOLE ENGINEERING JOURNEY.</text>
+</g>
+<g fill="#ef704b" opacity=".9"><rect x="1110" y="120" width="120" height="9"/><rect x="1140" y="140" width="90" height="4"/><rect x="100" y="1320" width="76" height="7"/><rect x="188" y="1320" width="18" height="7"/><rect x="215" y="1320" width="34" height="7"/></g>
+<g fill="url(#dots)" opacity=".28"><path d="M1040 1070H1310V1180H1040Z"/><path d="M100 1620H560V1680H100Z"/></g>
+<g font-family="monospace" fill="#aab3b5" font-size="16" letter-spacing="3">
+<text x="100" y="1665">VSCODE EXTENSION / LOCAL-FIRST / PROVIDER-AGNOSTIC</text>
+<text x="1295" y="1665" text-anchor="end">RS-EX / 001</text>
+<text x="100" y="1704" fill="#ef704b">BUILD WITH PURPOSE. PROVE WITH EVIDENCE.</text>
+</g>
+<rect width="1400" height="1800" filter="url(#rough)" opacity=".18"/>
+</svg>
