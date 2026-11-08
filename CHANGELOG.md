@@ -2,6 +2,23 @@
 
 All notable ROCKSOUL-EX changes are recorded here.
 
+## 0.3.0 — Reliability engines
+
+### Added
+- Root and nested .gitignore scanning with glob, negation, anchoring, and directory-only rule support.
+- Git root, branch, working-tree status, and previous-inspection file deltas.
+- Bounded session-local incremental scan cache and safer no-follow file reads.
+- Durable Forge transaction journal and pre-write backups, per-file staging/replacement, rollback on partial failure, and user-approved interrupted-transaction recovery.
+- Passing command evidence can be explicitly mapped to acceptance criteria; the cumulative proof matrix blocks Verified until every criterion has reviewed passing evidence.
+
+### Security
+- Recovery never overwrites files that match neither the transaction's before nor after snapshot.
+- Failed, cancelled, unreviewed, or stale-criterion evidence cannot satisfy the proof matrix.
+
+### Release gates
+- CI, Extension Host smoke test, and VSIX artifact must pass on the PR commit.
+- Clean-profile transaction/recovery and evidence-matrix behavior still require manual release-owner acceptance.
+
 ## 0.2.1 — Marketplace publisher identity
 
 ### Fixed

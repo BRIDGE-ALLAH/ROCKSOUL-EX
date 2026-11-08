@@ -1,50 +1,51 @@
 # ROCKSOUL-EX — Implementation Status
 
-**Release line:** 0.2.1 · **Status:** publisher identity correction candidate; v0.2.0 GitHub Release exists, Marketplace publication remains pending corrected publisher metadata and credential verification
+**Release line:** 0.3.0 candidate · **Repository state:** feature branch / PR validation pending · **Marketplace:** not verified as published
 
-This document separates code implemented in the repository from release checks that still require an actual environment or publisher credential.
+This document separates implementation in source from checks that require GitHub CI, a clean VS Code profile, a live provider account, or publisher credentials.
 
-## Implemented
+## Implemented in source
 
-- [x] JavaScript ESM VS Code package and activation entry point.
-- [x] Activity Bar, Mission Tree View, status item, Command Palette commands, and Output channel.
-- [x] Workspace Trust capability declaration with limited Restricted Mode support.
-- [x] Bounded, read-only inspection with depth, file count, per-file bytes, total bytes, symlink avoidance, path exclusions, and skipped-path report.
+- [x] JavaScript ESM VS Code package, Activity Bar, Mission Tree View, commands, status item, and Output channel.
+- [x] Workspace Trust and bounded read-only inspection.
+- [x] Sensitive-path, dependency, generated-output, binary, symlink, and custom exclusions.
+- [x] Root and nested .gitignore evaluation with common Git glob, anchoring, directory-only, and negation behavior.
+- [x] Read-only Git root, branch, dirty state, and bounded status summary.
+- [x] In-memory incremental cache keyed by file identity and timestamps; added/changed/removed scan deltas.
+- [x] File reads use no-follow open where supported, compare file identity before reading, and verify resolved paths remain inside the workspace.
 - [x] Project memory bootstrap that creates missing files only and preserves existing files.
-- [x] Nested storage symlink safeguards and non-creating read-only lookups.
-- [x] Mission schema, Markdown records, versioned JSON index, and allowed status transitions.
-- [x] OpenAI Responses API adapter with strict Structured Outputs schema, configurable model/endpoint, timeout, and request cancellation.
-- [x] API-key management via VS Code SecretStorage.
-- [x] Explicit disclosure of provider endpoint, model, and selected context paths.
-- [x] Mission context pack with file/path scope selection and secret exclusions.
-- [x] Patch proposal validation for path traversal, scope, duplicate paths, secret exclusions, text allowlist, size, symlink/hard-link targets, and create/update semantics.
-- [x] Diff previews in VS Code before application.
-- [x] Second explicit approval before applying a patch.
-- [x] Apply-time snapshot/hash revalidation to avoid overwriting files changed since proposal creation.
-- [x] Separate patch-application evidence from verification evidence.
-- [x] Local session handoff.
-- [x] Approved npm script execution with pre/post lifecycle hooks suppressed, timeout/cancellation, bounded output, and evidence records.
-- [x] Node unit tests, syntax check script, Extension Development Host smoke test, CI matrix, VSIX artifact job, and tag-based GitHub Release workflow definitions.
+- [x] Mission Markdown records, status transitions, versioned index, session handoff, and evidence log.
+- [x] OpenAI Responses API adapter, Structured Outputs validation, SecretStorage API-key handling, timeout, and cancellation.
+- [x] Explicit endpoint/model/context disclosure before a provider request.
+- [x] Mission-scoped patch validation, text allowlist, path exclusions, size checks, symlink/hard-link rejection, and snapshot/hash validation.
+- [x] Native diff preview and a second explicit user approval before file writes.
+- [x] Forge transaction journal and per-file backups stored in VS Code global storage before source writes.
+- [x] Per-file staged replacement, rollback after a partial failure, and recovery prompt for interrupted transactions.
+- [x] Rollback refuses to overwrite files that match neither the before nor expected after snapshot.
+- [x] Approved npm script execution with lifecycle hooks suppressed, timeout/cancellation, bounded output, and redacted evidence.
+- [x] Explicit criterion-to-evidence mapping and confirmation after reviewing a passing command.
+- [x] Evidence matrix aggregates reviewed passing evidence and prevents Verified while any acceptance criterion is uncovered.
+- [x] Node 20/22 CI definition, Extension Development Host smoke test, VSIX packaging, and GitHub Release workflow definition.
 
-## Known limits
+## Known limits / not yet verified
 
-- [ ] Witness does not yet implement complete .gitignore semantics, Git root/branch/dirty-state discovery, or incremental scan caching.
-- [ ] DNA documents are editable human-owned records; semantic freshness checks and linked-document indexing are not implemented.
-- [ ] Mission overlap detection and AI-assisted decomposition are not implemented.
-- [ ] Patch application is not transactional across multiple files. If a later save fails, some edits may already have been applied; inspect Source Control before retrying.
-- [ ] Proof only discovers npm scripts. It does not support other package managers or language-specific runners yet.
-- [ ] Proof records a command result but does not map every acceptance criterion to independent evidence; a mission is not automatically marked Verified.
-- [ ] Extension Host CI is a smoke test, not full GUI/manual QA.
-- [ ] Marketplace publication requires the exact publisher ID `MohRezzaFahlevi` and valid OIDC trust or Marketplace PAT.
-- [ ] A live provider request must be tested by the release owner using their own API account; this repository contains no API key.
+- [ ] Gitignore support targets common documented patterns; exhaustive parity with every Git edge case has not been independently conformance-tested.
+- [ ] Incremental cache is in-memory for the current extension session; it does not survive a VS Code restart.
+- [ ] The scan is bounded, and cancellation / very large monorepo performance still need stress profiling.
+- [ ] Filesystem transactions use per-file atomic replacement plus rollback; portable Node APIs do not provide a cross-file atomic commit or a universal compare-and-swap primitive against hostile concurrent writers.
+- [ ] A crash/recovery prompt is implemented, but clean-profile manual testing of forced termination at every transaction phase remains a release check.
+- [ ] Proof currently discovers npm scripts only; other package managers and language-specific runners remain planned.
+- [ ] Extension Host CI is a smoke test, not complete GUI/manual QA.
+- [ ] A live provider request and API billing behavior must be tested by the release owner using their own API account.
+- [ ] Marketplace publication requires valid publisher credentials or trusted OIDC and must be verified directly in the Marketplace.
 
 ## Release gates
 
-1. Latest pull-request CI is green on Node 20 and 22.
+1. Latest pull-request CI green on Node 20 and 22.
 2. Extension Development Host smoke test passes.
 3. VSIX packaging job succeeds and the artifact is downloadable.
-4. Release owner installs the VSIX in a clean VS Code profile and validates inspection, memory, mission, provider disclosure, proposal diff, apply/reject, and verification.
-5. Release owner validates a real provider request and API billing behavior.
-6. The Marketplace publisher identity and publishing credential/OIDC trust are verified before Marketplace publication.
+4. Clean-profile manual test covers inspection, nested ignore rules, mission creation, provider disclosure, diff review, apply/reject, transaction recovery, evidence mapping, and Verified gating.
+5. A live provider round-trip is tested using non-sensitive fixture content.
+6. Marketplace publication is reported only after the Marketplace confirms the published version.
 
-Do not describe the extension as Marketplace-published unless Marketplace confirms the published version.
+Do not describe source implementation, a GitHub Release, or a VSIX artifact as Marketplace publication.

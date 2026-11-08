@@ -181,3 +181,13 @@ export async function appendEvidence(root, evidence) {
   await atomicWrite(target, `${JSON.stringify({ version: 1, records: records.slice(0, 100) }, null, 2)}\n`);
   return relativePath;
 }
+
+export async function listEvidence(root, missionId) {
+  const raw = await readStoreFile(root, 'evidence/index.json');
+  if (!raw) return [];
+  let parsed;
+  try { parsed = JSON.parse(raw); }
+  catch { throw new Error('The .rocksoul/evidence/index.json file is invalid JSON.'); }
+  if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.records)) throw new Error('Unsupported or malformed ROCKSOUL evidence index.');
+  return parsed.records.filter((record) => !missionId || record.missionId === missionId);
+}

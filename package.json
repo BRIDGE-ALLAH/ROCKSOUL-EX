@@ -2,7 +2,7 @@
   "name": "rocksoul-ex",
   "displayName": "ROCKSOUL-EX — Engineering Companion",
   "description": "A local-first VS Code engineering companion for repository continuity, reviewed AI patches, missions, and proof.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "MohRezzaFahlevi",
   "license": "UNLICENSED",
   "type": "module",
@@ -51,7 +51,9 @@
         "rocksoul.scan.maxDepth",
         "rocksoul.scan.maxFiles",
         "rocksoul.scan.maxFileBytes",
-        "rocksoul.scan.maxTotalBytes"
+        "rocksoul.scan.maxTotalBytes",
+        "rocksoul.scan.respectGitignore",
+        "rocksoul.scan.incremental"
       ]
     },
     "virtualWorkspaces": {
@@ -137,6 +139,10 @@
       {
         "command": "rocksoul.refreshMissions",
         "title": "ROCKSOUL-EX: Refresh Missions"
+      },
+      {
+        "command": "rocksoul.recoverForgeTransactions",
+        "title": "ROCKSOUL-EX: Recover Interrupted Forge Transaction"
       }
     ],
     "viewsContainers": {
@@ -211,6 +217,10 @@
         },
         {
           "command": "rocksoul.applyPatch",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.recoverForgeTransactions",
           "when": "isWorkspaceTrusted"
         },
         {
@@ -299,6 +309,16 @@
           "maximum": 600,
           "scope": "application",
           "description": "Maximum time in seconds for a provider request. Timed out requests are cancelled before a patch proposal can be applied."
+        },
+        "rocksoul.scan.respectGitignore": {
+          "type": "boolean",
+          "default": true,
+          "description": "Respect root and nested .gitignore rules when building project context."
+        },
+        "rocksoul.scan.incremental": {
+          "type": "boolean",
+          "default": true,
+          "description": "Reuse unchanged text files from the in-memory Witness cache."
         }
       }
     }

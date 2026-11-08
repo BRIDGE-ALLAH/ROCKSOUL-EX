@@ -43,7 +43,11 @@ The Forge model has no direct tools for filesystem, terminal, network, Git, or d
 - Proposed files are displayed in native VS Code diffs.
 - The developer must approve application separately after reviewing the diffs.
 - Apply is separate from verification.
-- Multi-file apply is not transactional. If a later editor save fails after a prior file has been saved, inspect Source Control and review the partial result before retrying.
+- Before multi-file writes, Forge persists a transaction journal and pre-write backups in VS Code global storage.
+- Each file is staged in its own directory and replaced atomically; a later write failure triggers rollback of earlier writes.
+- Rollback restores only files still matching the expected transaction output. A file matching neither the before nor after hash is reported as a conflict and is not overwritten.
+- Incomplete journals are surfaced after restart; rollback requires explicit user confirmation.
+- This is recoverable per-file application, not a cross-file atomic filesystem commit.
 
 ## Command execution
 
@@ -53,7 +57,8 @@ The Forge model has no direct tools for filesystem, terminal, network, Git, or d
 - The selected script itself can still perform arbitrary actions; read it before approving.
 - Execution has a configurable timeout, cancellation path, and bounded output.
 - Output persisted to evidence is redacted for common token/secret patterns and truncated.
-- A passed command is evidence for that command only, not proof that all mission acceptance criteria are met.
+- A passed command is evidence for that command only until the user explicitly maps it to the criteria it supports and confirms the mapping.
+- The cumulative evidence matrix counts only reviewed, passing evidence whose criterion index and wording still match the mission. Every criterion must be covered before the user is offered the separate Mark Verified confirmation.
 
 ## Local storage and logging
 
@@ -72,7 +77,10 @@ The Forge model has no direct tools for filesystem, terminal, network, Git, or d
 | Repo prompt injection | Treat source as data; no model tools |
 | Model suggests file outside mission | Application path/scope validation |
 | Model targets credential file | Hard exclusion policy |
-| User edits file after proposal | Apply-time hash revalidation |
+| User edits file after proposal | Apply-time hash revalidation and per-write snapshot check |
+| Later file write fails | Journal, backups, rollback, and conflict-safe recovery |
+| Ignored file enters context | Root/nested .gitignore evaluation before file reads |
+| Incomplete proof marked Verified | Criterion matrix requiring reviewed passing evidence for every criterion |
 | Symlink/hard-link escape | lstat checks and hard-link rejection |
 | Unexpected shell side effects | Exact command preview and explicit approval |
 | npm lifecycle hook surprise | npm ignore-scripts mode |

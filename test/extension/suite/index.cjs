@@ -20,6 +20,7 @@ function run() {
         'rocksoul.generatePatch',
         'rocksoul.reviewPatch',
         'rocksoul.applyPatch',
+        'rocksoul.recoverForgeTransactions',
         'rocksoul.verifyMission'
       ]) {
         assert.ok(commands.includes(command), `Expected command to be registered: ${command}`);
