@@ -1,6 +1,6 @@
 # ROCKSOUL-EX — Implementation Status
 
-**Release line:** 0.2.0 · **Status:** feature-complete candidate pending final CI, clean-profile installation, and live-provider acceptance
+**Release line:** 0.2.1 · **Status:** publisher identity correction candidate; v0.2.0 GitHub Release exists, Marketplace publication remains pending corrected publisher metadata and credential verification
 
 This document separates code implemented in the repository from release checks that still require an actual environment or publisher credential.
 
@@ -35,7 +35,7 @@ This document separates code implemented in the repository from release checks t
 - [ ] Proof only discovers npm scripts. It does not support other package managers or language-specific runners yet.
 - [ ] Proof records a command result but does not map every acceptance criterion to independent evidence; a mission is not automatically marked Verified.
 - [ ] Extension Host CI is a smoke test, not full GUI/manual QA.
-- [ ] Marketplace publication requires a registered publisher and valid OIDC trust or Marketplace PAT.
+- [ ] Marketplace publication requires the exact publisher ID `MohRezzaFahlevi` and valid OIDC trust or Marketplace PAT.
 - [ ] A live provider request must be tested by the release owner using their own API account; this repository contains no API key.
 
 ## Release gates

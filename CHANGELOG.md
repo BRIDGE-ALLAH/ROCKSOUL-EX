@@ -2,6 +2,13 @@
 
 All notable ROCKSOUL-EX changes are recorded here.
 
+## 0.2.1 — Marketplace publisher identity
+
+### Fixed
+- Align the extension manifest publisher ID with the registered Marketplace publisher `MohRezzaFahlevi`.
+- Derive the Extension Host test extension identifier from package metadata instead of hard-coding a publisher value.
+- Bump the package version so the corrected identity ships as a new VSIX and does not overwrite v0.2.0.
+
 ## 0.2.0 — Forge and review workflow
 
 ### Added
