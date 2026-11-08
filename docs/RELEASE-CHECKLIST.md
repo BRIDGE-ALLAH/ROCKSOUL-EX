@@ -16,15 +16,15 @@ A push to `main` that changes the release workflow, package metadata, changelog,
 
 The workflow reads the version from `package.json`, verifies that `package-lock.json` and its root package entry match, and checks whether the corresponding `vX.Y.Z` GitHub Release already exists. When no release exists, it re-runs the automated checks, builds a VSIX, creates the matching tag on the triggering `main` commit, and attaches the VSIX to a GitHub Release.
 
-The current release candidate is version `0.2.0`. Do not change package metadata without updating `package.json` and `package-lock.json` together.
+The current release candidate is version `0.2.1` with the exact Marketplace publisher ID `MohRezzaFahlevi` in `package.json`. Keep the ID spelling and case identical to the Marketplace publisher account. Version `0.2.0` remains a historical GitHub Release. Do not change package metadata without updating `package.json` and `package-lock.json` together.
 
 ## Visual Studio Marketplace
 
 Marketplace publication is separate from a GitHub Release and requires publisher ownership/access:
 
-1. Register and verify the publisher ID configured in `package.json`.
-2. Configure Marketplace OIDC trusted publishing and set repository variable `VSCE_USE_OIDC=true`, or configure repository secret `VSCE_PAT`.
-3. Verify publisher access before announcing a Marketplace publication.
+1. The current `package.json` publisher ID is `MohRezzaFahlevi`; verify that the Marketplace publisher account selected for upload is exactly this ID.
+2. Configure Marketplace OIDC trusted publishing and set repository variable `VSCE_USE_OIDC=true`, or configure repository secret `VSCE_PAT` with `Marketplace (Manage)` scope and access to this publisher.
+3. Confirm the credential belongs to `MohRezzaFahlevi` before announcing a Marketplace publication.
 
 The workflow attempts Marketplace publication only when one of those explicit repository settings is present. A successful GitHub Release does not imply Marketplace publication.
 

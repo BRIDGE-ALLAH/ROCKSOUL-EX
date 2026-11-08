@@ -1,4 +1,5 @@
 const Mocha = require('mocha');
+const manifest = require('../../../package.json');
 
 function run() {
   const mocha = new Mocha({ ui: 'tdd', color: false });
@@ -8,7 +9,7 @@ function run() {
 
   suite('ROCKSOUL-EX Extension Host', () => {
     test('extension activates and registers the production command surface', async () => {
-      const extension = vscode.extensions.getExtension('bridge-allah.rocksoul-ex');
+      const extension = vscode.extensions.getExtension(`${manifest.publisher}.${manifest.name}`);
       assert.ok(extension, 'ROCKSOUL-EX must be discoverable by its publisher and package name');
       await extension.activate();
       assert.equal(extension.isActive, true);

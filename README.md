@@ -10,7 +10,7 @@ ROCKSOUL-EX is a local-first Visual Studio Code engineering companion. It connec
 
 ## Current release line
 
-**0.2.0 — Forge and review workflow.** ROCKSOUL-EX includes the local-first Witness, Memory, Mission, and Proof foundation plus an OpenAI Responses API adapter, SecretStorage credentials, mission-scoped structured patch proposals, diff preview, and a second explicit approval before applying changes.
+**0.2.1 — Marketplace publisher alignment.** ROCKSOUL-EX includes the local-first Witness, Memory, Mission, and Proof foundation plus an OpenAI Responses API adapter, SecretStorage credentials, mission-scoped structured patch proposals, diff preview, and a second explicit approval before applying changes.
 
 The AI provider integration sends only the selected mission context after a disclosure prompt. The model never has direct file-system or shell access. A successful command or patch application does not automatically verify a mission.
 
@@ -41,7 +41,7 @@ The extension respects Workspace Trust. Writes, provider requests, patch applica
 - GitHub Actions tests Node 20 and 22.
 - An Extension Development Host smoke test runs in CI.
 - A VSIX package is built as a CI artifact.
-- A version tag triggers the GitHub Release workflow. Marketplace publishing requires a registered publisher and a configured Marketplace credential/OIDC trust.
+- A version change merged to main triggers a verified GitHub Release. The Marketplace publisher ID is `MohRezzaFahlevi`; publication requires a matching Marketplace publisher credential or trusted OIDC configuration.
 
 Read [Implementation Status](docs/IMPLEMENTATION-STATUS.md), [Security](SECURITY.md), and [Release Checklist](docs/RELEASE-CHECKLIST.md). A green CI run is necessary but not a substitute for a clean-profile manual installation and live-provider acceptance test.
 
