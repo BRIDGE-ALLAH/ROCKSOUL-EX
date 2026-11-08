@@ -1,0 +1,87 @@
+{
+  "name": "rocksoul-ex",
+  "displayName": "ROCKSOUL-EX — Engineering Companion",
+  "description": "A local-first VS Code companion that connects project context, focused missions, and verification evidence.",
+  "version": "0.1.0",
+  "publisher": "bridge-allah",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./src/extension.js",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Other", "Machine Learning"],
+  "keywords": ["project-context", "engineering-workflow", "local-first", "missions", "verification"],
+  "activationEvents": [
+    "onView:rocksoul.missions",
+    "onCommand:rocksoul.inspectProject",
+    "onCommand:rocksoul.createMission",
+    "onCommand:rocksoul.bootstrapMemory"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "test:watch": "node --test --watch",
+    "check": "node --check src/extension.js && node --test"
+  },
+  "contributes": {
+    "commands": [
+      { "command": "rocksoul.openPanel", "title": "ROCKSOUL-EX: Open Companion" },
+      { "command": "rocksoul.inspectProject", "title": "ROCKSOUL-EX: Inspect Project" },
+      { "command": "rocksoul.bootstrapMemory", "title": "ROCKSOUL-EX: Create Project Memory" },
+      { "command": "rocksoul.openProjectMemory", "title": "ROCKSOUL-EX: Open Project DNA" },
+      { "command": "rocksoul.createMission", "title": "ROCKSOUL-EX: Create Mission" },
+      { "command": "rocksoul.prepareMissionPrompt", "title": "ROCKSOUL-EX: Prepare AI Mission Prompt" },
+      { "command": "rocksoul.updateMissionStatus", "title": "ROCKSOUL-EX: Update Mission Status" },
+      { "command": "rocksoul.openMission", "title": "ROCKSOUL-EX: Open Mission" },
+      { "command": "rocksoul.createHandoff", "title": "ROCKSOUL-EX: Create Session Handoff" },
+      { "command": "rocksoul.verifyMission", "title": "ROCKSOUL-EX: Run Approved Verification" },
+      { "command": "rocksoul.refreshMissions", "title": "ROCKSOUL-EX: Refresh Missions" }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rocksoul",
+          "title": "ROCKSOUL-EX",
+          "icon": "assets/rocksoul-ex-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "rocksoul": [
+        {
+          "id": "rocksoul.missions",
+          "name": "Missions",
+          "type": "tree",
+          "when": "workspaceFolderCount > 0"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "rocksoul.missions",
+        "contents": "**Your work, with its context intact.**\n\nInspect this workspace, create its local DNA, or start a focused mission.\n\n[Inspect Project](command:rocksoul.inspectProject) · [Create Project Memory](command:rocksoul.bootstrapMemory) · [New Mission](command:rocksoul.createMission)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        { "command": "rocksoul.createMission", "when": "view == rocksoul.missions", "group": "navigation" },
+        { "command": "rocksoul.refreshMissions", "when": "view == rocksoul.missions", "group": "navigation" }
+      ],
+      "view/item/context": [
+        { "command": "rocksoul.openMission", "when": "view == rocksoul.missions && viewItem == rocksoulMission", "group": "inline" }
+      ]
+    },
+    "configuration": {
+      "title": "ROCKSOUL-EX",
+      "properties": {
+        "rocksoul.scan.maxDepth": { "type": "number", "default": 5, "minimum": 1, "maximum": 12, "description": "Maximum directory depth for a read-only project inspection." },
+        "rocksoul.scan.maxFiles": { "type": "number", "default": 400, "minimum": 20, "maximum": 5000, "description": "Maximum number of files considered during project inspection." },
+        "rocksoul.scan.maxFileBytes": { "type": "number", "default": 131072, "minimum": 4096, "maximum": 1048576, "description": "Maximum bytes read from one text file." },
+        "rocksoul.scan.maxTotalBytes": { "type": "number", "default": 1048576, "minimum": 65536, "maximum": 10485760, "description": "Maximum total bytes read during project inspection." },
+        "rocksoul.scan.excludedPaths": { "type": "array", "items": { "type": "string" }, "default": [], "description": "Additional relative path segments or glob-like patterns to exclude from inspection." },
+        "rocksoul.verification.timeoutSeconds": { "type": "number", "default": 120, "minimum": 5, "maximum": 600, "description": "Maximum time allowed for an approved verification script." },
+        "rocksoul.verification.maxOutputBytes": { "type": "number", "default": 16384, "minimum": 1024, "maximum": 131072, "description": "Maximum combined command output retained in an evidence record." }
+      }
+    }
+  }
+}

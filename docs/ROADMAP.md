@@ -2,121 +2,95 @@
 
 ## Delivery strategy
 
-Build in a sequence that proves product value before adding complexity. Each milestone must produce a usable capability and explicit evidence. Dates are intentionally omitted; progress should be measured by acceptance criteria, not optimistic calendar estimates.
+Build in a sequence that proves product value before adding complexity. Each milestone must produce a usable capability and explicit evidence. Dates are intentionally omitted; progress is measured by acceptance criteria, not optimistic estimates.
 
-## M0 — Product and technical foundation
+## M0 — Extension foundation
 
-**Outcome:** a stable contract for the first implementation.
+**Status: implemented in 0.1.0; Extension Development Host smoke test pending.**
 
-- [ ] Confirm product name, positioning, and first-release scope.
-- [ ] Keep the repository documentation as the single product baseline.
-- [ ] Create a minimal VS Code extension skeleton in JavaScript ESM.
-- [ ] Add a minimal test runner and formatting / lint conventions.
-- [ ] Add a sample workspace fixture with mixed project files.
-- [ ] Record the extension's supported VS Code engine range.
-- [ ] Validate the extension can activate and run one command.
-- [ ] Document how to run extension-host tests locally.
-
-**Exit criteria:** extension installs in an Extension Development Host, one command runs, and a smoke test passes.
+- [x] JavaScript ESM extension manifest and entry point.
+- [x] Activity Bar container, native Missions Tree View, status item, commands, and Output channel.
+- [x] Dependency-free Node test runner and CI workflow.
+- [x] VS Code engine range and local setup guide.
+- [ ] Automated Extension Development Host activation test.
+- [ ] VSIX packaging validation.
 
 ## M1 — THE WITNESS
 
-**Outcome:** read-only workspace understanding.
+**Status: bounded inspection implemented; advanced repository semantics remain open.**
 
-- [ ] Detect workspace root and Git root safely.
-- [ ] Respect Workspace Trust.
-- [ ] Implement conservative ignore and secret exclusions.
-- [ ] Add scan depth, file count, file size, and total-byte limits.
-- [ ] Discover common manifests, scripts, docs, source roots, and tests.
-- [ ] Create a project map with source-linked facts.
-- [ ] Show observed, inferred, skipped, and unknown information distinctly.
-- [ ] Add cancellation and progress feedback.
-- [ ] Add tests for exclusions, limits, and unusual repository layouts.
-
-**Exit criteria:** inspection works on the sample fixture and a medium-sized real repository without modifying workspace files.
+- [x] Resolve a selected workspace folder and report an empty-workspace state.
+- [x] Read-only directory walk with depth, file-count, per-file-size, and total-byte limits.
+- [x] Conservative secret, credential, dependency, generated-output, binary, and `.rocksoul` exclusions.
+- [x] Avoid symbolic links and present skipped-path reasons.
+- [x] Detect common manifests, likely source/test/docs roots, and file-type distribution.
+- [x] Present observed paths, heuristics, and limitations in a report.
+- [ ] Git root / branch / dirty-state inspection.
+- [ ] Full `.gitignore` semantics and incremental scan caching.
+- [ ] Large-monorepo performance profiling and cancellation hardening.
 
 ## M2 — THE MEMORY
 
-**Outcome:** durable, portable project context.
+**Status: local store and basic handoff implemented.**
 
-- [ ] Define and validate the .rocksoul data contract.
-- [ ] Bootstrap only missing files after explicit user consent.
-- [ ] Read DNA and architecture references.
-- [ ] Record decisions with date, rationale, and affected area.
-- [ ] Save a session handoff.
-- [ ] Detect when a handoff may be stale.
-- [ ] Add inspect / edit / delete affordances for ROCKSOUL-owned data.
-- [ ] Test round-trip serialization and malformed records.
-
-**Exit criteria:** a user can close VS Code, reopen the project, and recover an accurate handoff without a provider call.
+- [x] Bootstrap `.rocksoul/` after explicit confirmation.
+- [x] Create only missing files and preserve pre-existing content.
+- [x] Human-readable project DNA, architecture, decision, mission, and handoff files.
+- [x] Versioned JSON mission index and basic validation.
+- [x] Resume missions from local state after editor restart.
+- [ ] Semantic freshness checks for linked documentation.
+- [ ] Rich inspect/edit/delete affordances and data migration tests.
 
 ## M3 — THE MISSION
 
-**Outcome:** turn goals into bounded engineering tasks.
+**Status: foundational mission lifecycle implemented.**
 
-- [ ] Define Mission schema and status transitions.
-- [ ] Create a mission from a natural-language goal.
-- [ ] Attach scope, exclusions, assumptions, risks, and acceptance criteria.
-- [ ] Split large goals into reviewable steps.
-- [ ] Detect likely overlap with active missions.
-- [ ] Display mission list and mission detail in native VS Code UI.
-- [ ] Support pause, defer, resume, and close.
-- [ ] Test invalid state transitions and incomplete criteria.
-
-**Exit criteria:** a mission can be created and resumed without AI; AI may improve decomposition but is not required for storage or display.
+- [x] Mission schema validation and state transition guard.
+- [x] Manual mission creation with scope and acceptance criteria.
+- [x] Native Missions Tree View and Markdown mission detail.
+- [x] Status updates that cannot skip directly from Draft to Verified.
+- [ ] AI decomposition, mission overlap detection, and richer review workflow.
+- [ ] Criterion-level evidence mapping and verified closure.
 
 ## M4 — THE FORGE
 
-**Outcome:** provider-assisted, reviewable implementation.
+**Status: manual provider handoff implemented; automated provider and patch workflow deferred.**
 
-- [ ] Define the provider adapter contract.
-- [ ] Run a feasibility spike for one initial provider.
-- [ ] Store provider secrets with secure editor storage.
-- [ ] Build minimal context packs from the active mission.
-- [ ] Validate provider output and proposed changed paths.
-- [ ] Present the proposed patch in the VS Code diff editor.
-- [ ] Require explicit approval before applying edits by default.
-- [ ] Record changed files and proposal metadata.
-- [ ] Test provider failures, cancellation, malformed output, and scope violations.
-
-**Exit criteria:** one provider can propose a small patch, the developer can review it, and only approved changes are applied.
+- [x] Build a bounded context pack from mission, DNA, architecture, decisions, and eligible project excerpts.
+- [x] Disclose context categories and copy to clipboard without network access.
+- [ ] Provider port and first API adapter.
+- [ ] Secure provider credentials using VS Code SecretStorage.
+- [ ] Structured patch proposal, scope validation, native diff preview, and approval-bound apply.
 
 ## M5 — THE PROOF
 
-**Outcome:** honest verification and mission closure.
+**Status: approved npm script runner and evidence log implemented.**
 
-- [ ] Discover project check commands as suggestions.
-- [ ] Show command, arguments, working directory, and expected effect.
-- [ ] Enforce Workspace Trust and command approval policy.
-- [ ] Run approved checks with timeout, cancellation, and output limits.
-- [ ] Store command evidence and exit status.
-- [ ] Map evidence to acceptance criteria.
-- [ ] Distinguish implemented, verified, failed, not-run, and blocked.
-- [ ] Generate a concise mission report.
-- [ ] Test failing commands and interrupted runs.
-
-**Exit criteria:** a mission cannot become Verified unless every required criterion has supporting evidence and the required checks passed.
+- [x] Discover eligible npm scripts as suggestions only.
+- [x] Require Workspace Trust and explicit command approval.
+- [x] Execute one selected npm script with timeout and bounded output.
+- [x] Persist command, working directory, timestamps, exit code, status, and redacted output excerpt.
+- [ ] Additional package-manager and language-specific runners.
+- [ ] Evidence-to-criterion mapping and verified mission closure.
+- [ ] Security test fixtures for malicious scripts, output redaction, and cancellation.
 
 ## M6 — EXPERIENCE HARDENING
 
-**Outcome:** a dependable extension that feels at home in VS Code.
+**Status: started.**
 
-- [ ] Audit accessibility and keyboard navigation.
-- [ ] Test dark and light themes.
-- [ ] Test large repositories and cancellation.
-- [ ] Improve performance and cache invalidation.
-- [ ] Add extension packaging and release automation.
-- [ ] Add a clean uninstall / workspace data retention guide.
-- [ ] Validate installation on supported VS Code versions.
-- [ ] Publish a release only after a complete smoke and security test.
+- [x] Respect VS Code theme and use native controls.
+- [x] Add CI for Node 20 and 22 unit tests.
+- [ ] Accessibility and keyboard-navigation audit in Extension Development Host.
+- [ ] Test light/dark themes, large workspaces, and multi-root behavior.
+- [ ] VSIX packaging, installation, and clean uninstall validation.
+- [ ] Release automation and Marketplace metadata review.
 
 ## Later exploration — not MVP commitments
 
-- Multiple provider adapters.
-- Optional local companion process.
+- Multiple provider adapters and optional local model support.
 - Optional MoonWitness knowledge bridge.
 - Mission templates and reusable project playbooks.
 - Multi-agent delegation with explicit role boundaries.
 - Team synchronization after a privacy and access model exists.
 
-These ideas must not delay the first reliable single-developer workflow.
+These ideas must not delay a dependable single-developer workflow.

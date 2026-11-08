@@ -1,0 +1,5 @@
+.github/**
+test/**
+docs/**
+*.log
+.gitignore
