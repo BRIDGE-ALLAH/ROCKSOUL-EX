@@ -1,8 +1,8 @@
 {
   "name": "rocksoul-ex",
   "displayName": "ROCKSOUL-EX — Engineering Companion",
-  "description": "A local-first VS Code companion that connects project context, focused missions, and verification evidence.",
-  "version": "0.1.0",
+  "description": "A local-first VS Code engineering companion for repository continuity, reviewed AI patches, missions, and proof.",
+  "version": "0.2.0",
   "publisher": "bridge-allah",
   "license": "UNLICENSED",
   "type": "module",
@@ -10,32 +10,134 @@
   "engines": {
     "vscode": "^1.90.0"
   },
-  "categories": ["Other", "Machine Learning"],
-  "keywords": ["project-context", "engineering-workflow", "local-first", "missions", "verification"],
+  "extensionKind": [
+    "workspace"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BRIDGE-ALLAH/ROCKSOUL-EX.git"
+  },
+  "homepage": "https://github.com/BRIDGE-ALLAH/ROCKSOUL-EX#readme",
+  "bugs": {
+    "url": "https://github.com/BRIDGE-ALLAH/ROCKSOUL-EX/issues"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "project-context",
+    "engineering-workflow",
+    "local-first",
+    "missions",
+    "verification",
+    "code-review"
+  ],
   "activationEvents": [
     "onView:rocksoul.missions",
     "onCommand:rocksoul.inspectProject",
     "onCommand:rocksoul.createMission",
     "onCommand:rocksoul.bootstrapMemory"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "%untrustedWorkspaces.description%",
+      "restrictedConfigurations": [
+        "rocksoul.provider.baseUrl",
+        "rocksoul.provider.model",
+        "rocksoul.provider.maxOutputTokens",
+        "rocksoul.scan.excludedPaths",
+        "rocksoul.scan.maxDepth",
+        "rocksoul.scan.maxFiles",
+        "rocksoul.scan.maxFileBytes",
+        "rocksoul.scan.maxTotalBytes"
+      ]
+    },
+    "virtualWorkspaces": {
+      "supported": false
+    }
+  },
   "scripts": {
-    "test": "node --test",
-    "test:watch": "node --test --watch",
-    "check": "node --check src/extension.js && node --test"
+    "test": "node --test test/*.test.js",
+    "test:watch": "node --test --watch test/*.test.js",
+    "check": "node scripts/check-syntax.js && npm test",
+    "test:extension": "node test/extension/run-tests.js"
   },
   "contributes": {
     "commands": [
-      { "command": "rocksoul.openPanel", "title": "ROCKSOUL-EX: Open Companion" },
-      { "command": "rocksoul.inspectProject", "title": "ROCKSOUL-EX: Inspect Project" },
-      { "command": "rocksoul.bootstrapMemory", "title": "ROCKSOUL-EX: Create Project Memory" },
-      { "command": "rocksoul.openProjectMemory", "title": "ROCKSOUL-EX: Open Project DNA" },
-      { "command": "rocksoul.createMission", "title": "ROCKSOUL-EX: Create Mission" },
-      { "command": "rocksoul.prepareMissionPrompt", "title": "ROCKSOUL-EX: Prepare AI Mission Prompt" },
-      { "command": "rocksoul.updateMissionStatus", "title": "ROCKSOUL-EX: Update Mission Status" },
-      { "command": "rocksoul.openMission", "title": "ROCKSOUL-EX: Open Mission" },
-      { "command": "rocksoul.createHandoff", "title": "ROCKSOUL-EX: Create Session Handoff" },
-      { "command": "rocksoul.verifyMission", "title": "ROCKSOUL-EX: Run Approved Verification" },
-      { "command": "rocksoul.refreshMissions", "title": "ROCKSOUL-EX: Refresh Missions" }
+      {
+        "command": "rocksoul.openPanel",
+        "title": "ROCKSOUL-EX: Open Companion"
+      },
+      {
+        "command": "rocksoul.inspectProject",
+        "title": "ROCKSOUL-EX: Inspect Project"
+      },
+      {
+        "command": "rocksoul.bootstrapMemory",
+        "title": "ROCKSOUL-EX: Create Project Memory"
+      },
+      {
+        "command": "rocksoul.openProjectMemory",
+        "title": "ROCKSOUL-EX: Open Project DNA"
+      },
+      {
+        "command": "rocksoul.createMission",
+        "title": "ROCKSOUL-EX: Create Mission"
+      },
+      {
+        "command": "rocksoul.prepareMissionPrompt",
+        "title": "ROCKSOUL-EX: Copy AI Mission Prompt"
+      },
+      {
+        "command": "rocksoul.updateMissionStatus",
+        "title": "ROCKSOUL-EX: Update Mission Status"
+      },
+      {
+        "command": "rocksoul.openMission",
+        "title": "ROCKSOUL-EX: Open Mission"
+      },
+      {
+        "command": "rocksoul.createHandoff",
+        "title": "ROCKSOUL-EX: Create Session Handoff"
+      },
+      {
+        "command": "rocksoul.verifyMission",
+        "title": "ROCKSOUL-EX: Run Approved Verification"
+      },
+      {
+        "command": "rocksoul.configureProvider",
+        "title": "ROCKSOUL-EX: Configure AI Provider"
+      },
+      {
+        "command": "rocksoul.setOpenAiApiKey",
+        "title": "ROCKSOUL-EX: Set OpenAI API Key"
+      },
+      {
+        "command": "rocksoul.clearOpenAiApiKey",
+        "title": "ROCKSOUL-EX: Clear OpenAI API Key"
+      },
+      {
+        "command": "rocksoul.generatePatch",
+        "title": "ROCKSOUL-EX: Generate Mission Patch"
+      },
+      {
+        "command": "rocksoul.reviewPatch",
+        "title": "ROCKSOUL-EX: Review Pending Patch"
+      },
+      {
+        "command": "rocksoul.applyPatch",
+        "title": "ROCKSOUL-EX: Apply Reviewed Patch"
+      },
+      {
+        "command": "rocksoul.rejectPatch",
+        "title": "ROCKSOUL-EX: Reject Pending Patch"
+      },
+      {
+        "command": "rocksoul.refreshMissions",
+        "title": "ROCKSOUL-EX: Refresh Missions"
+      }
     ],
     "viewsContainers": {
       "activitybar": [
@@ -64,23 +166,140 @@
     ],
     "menus": {
       "view/title": [
-        { "command": "rocksoul.createMission", "when": "view == rocksoul.missions", "group": "navigation" },
-        { "command": "rocksoul.refreshMissions", "when": "view == rocksoul.missions", "group": "navigation" }
+        {
+          "command": "rocksoul.createMission",
+          "when": "view == rocksoul.missions",
+          "group": "navigation"
+        },
+        {
+          "command": "rocksoul.refreshMissions",
+          "when": "view == rocksoul.missions",
+          "group": "navigation"
+        }
       ],
       "view/item/context": [
-        { "command": "rocksoul.openMission", "when": "view == rocksoul.missions && viewItem == rocksoulMission", "group": "inline" }
+        {
+          "command": "rocksoul.openMission",
+          "when": "view == rocksoul.missions && viewItem == rocksoulMission",
+          "group": "inline"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "rocksoul.bootstrapMemory",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.createMission",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.updateMissionStatus",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.createHandoff",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.verifyMission",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.generatePatch",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.applyPatch",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "rocksoul.rejectPatch",
+          "when": "isWorkspaceTrusted"
+        }
       ]
     },
     "configuration": {
       "title": "ROCKSOUL-EX",
       "properties": {
-        "rocksoul.scan.maxDepth": { "type": "number", "default": 5, "minimum": 1, "maximum": 12, "description": "Maximum directory depth for a read-only project inspection." },
-        "rocksoul.scan.maxFiles": { "type": "number", "default": 400, "minimum": 20, "maximum": 5000, "description": "Maximum number of files considered during project inspection." },
-        "rocksoul.scan.maxFileBytes": { "type": "number", "default": 131072, "minimum": 4096, "maximum": 1048576, "description": "Maximum bytes read from one text file." },
-        "rocksoul.scan.maxTotalBytes": { "type": "number", "default": 1048576, "minimum": 65536, "maximum": 10485760, "description": "Maximum total bytes read during project inspection." },
-        "rocksoul.scan.excludedPaths": { "type": "array", "items": { "type": "string" }, "default": [], "description": "Additional relative path segments or glob-like patterns to exclude from inspection." },
-        "rocksoul.verification.timeoutSeconds": { "type": "number", "default": 120, "minimum": 5, "maximum": 600, "description": "Maximum time allowed for an approved verification script." },
-        "rocksoul.verification.maxOutputBytes": { "type": "number", "default": 16384, "minimum": 1024, "maximum": 131072, "description": "Maximum combined command output retained in an evidence record." }
+        "rocksoul.scan.maxDepth": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Maximum directory depth for a read-only project inspection."
+        },
+        "rocksoul.scan.maxFiles": {
+          "type": "number",
+          "default": 400,
+          "minimum": 20,
+          "maximum": 5000,
+          "description": "Maximum number of files considered during project inspection."
+        },
+        "rocksoul.scan.maxFileBytes": {
+          "type": "number",
+          "default": 131072,
+          "minimum": 4096,
+          "maximum": 1048576,
+          "description": "Maximum bytes read from one text file."
+        },
+        "rocksoul.scan.maxTotalBytes": {
+          "type": "number",
+          "default": 1048576,
+          "minimum": 65536,
+          "maximum": 10485760,
+          "description": "Maximum total bytes read during project inspection."
+        },
+        "rocksoul.scan.excludedPaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional relative path segments or glob-like patterns to exclude from inspection."
+        },
+        "rocksoul.provider.baseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "OpenAI Responses API base URL. HTTPS is required, except for localhost development endpoints.",
+          "scope": "application"
+        },
+        "rocksoul.provider.model": {
+          "type": "string",
+          "default": "gpt-6-luna",
+          "description": "Model ID available to your OpenAI API project. Choose a model that supports the Responses API and Structured Outputs.",
+          "scope": "application"
+        },
+        "rocksoul.provider.maxOutputTokens": {
+          "type": "number",
+          "default": 12000,
+          "minimum": 1000,
+          "maximum": 32000,
+          "description": "Maximum generated patch response tokens.",
+          "scope": "application"
+        },
+        "rocksoul.verification.timeoutSeconds": {
+          "type": "number",
+          "default": 120,
+          "minimum": 5,
+          "maximum": 600,
+          "description": "Maximum time allowed for an approved verification script."
+        },
+        "rocksoul.verification.maxOutputBytes": {
+          "type": "number",
+          "default": 16384,
+          "minimum": 1024,
+          "maximum": 131072,
+          "description": "Maximum combined command output retained in an evidence record."
+        },
+        "rocksoul.provider.timeoutSeconds": {
+          "type": "number",
+          "default": 180,
+          "minimum": 15,
+          "maximum": 600,
+          "scope": "application",
+          "description": "Maximum time in seconds for a provider request. Timed out requests are cancelled before a patch proposal can be applied."
+        }
       }
     }
   }

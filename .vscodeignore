@@ -1,6 +1,8 @@
 .github/**
+.vscode/**
 test/**
-docs/**
+scripts/**
 *.log
 .gitignore
-.vscode/**
+.vscodeignore
+package-lock.json

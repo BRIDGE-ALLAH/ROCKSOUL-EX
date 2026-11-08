@@ -37,6 +37,14 @@ export async function loadMissionSummaries(root) {
   return listMissions(root);
 }
 
+export async function loadMissionDetails(root, missionId) {
+  const records = await listMissions(root);
+  const record = records.find((item) => item.id === missionId);
+  if (!record) throw new Error(`Mission ${missionId} was not found.`);
+  const stored = await import('../infrastructure/rocksoul-store.js').then((module) => module.openMissionRecord(root, missionId));
+  return parseMissionMarkdown(stored.content, record);
+}
+
 function parseMissionMarkdown(content, record) {
   const section = (heading) => {
     const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

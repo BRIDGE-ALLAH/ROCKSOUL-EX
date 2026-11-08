@@ -2,9 +2,7 @@
 
 **The Engineering Experience. Build with purpose. Prove with evidence.**
 
-![ROCKSOUL-EX poster](assets/rocksoul-ex-poster.svg)
-
-ROCKSOUL-EX is a local-first Visual Studio Code engineering companion. It connects repository context, durable project memory, focused missions, a provider-neutral AI handoff, and verification evidence — without requiring a hosted backend.
+ROCKSOUL-EX is a local-first Visual Studio Code engineering companion. It connects repository context, durable project memory, focused missions, AI-proposed patches, human review, and verification evidence — without requiring a hosted backend.
 
 **OBSERVE → UNDERSTAND → BUILD → VERIFY**
 
@@ -12,51 +10,49 @@ ROCKSOUL-EX is a local-first Visual Studio Code engineering companion. It connec
 
 ## Current release line
 
-**0.1.0 — working local-first MVP foundation.** The repository now contains a runnable VS Code extension implementation, bounded project inspection, `.rocksoul/` memory, missions, clipboard-based AI context packs, and explicit npm verification with evidence records.
+**0.2.0 — Forge and review workflow.** ROCKSOUL-EX includes the local-first Witness, Memory, Mission, and Proof foundation plus an OpenAI Responses API adapter, SecretStorage credentials, mission-scoped structured patch proposals, diff preview, and a second explicit approval before applying changes.
 
-The initial Forge handoff does not call an AI API. An automated provider adapter, patch/diff approval, full mission verification, and Marketplace packaging remain separate work and are not represented as complete.
+The AI provider integration sends only the selected mission context after a disclosure prompt. The model never has direct file-system or shell access. A successful command or patch application does not automatically verify a mission.
 
-## Start here
+## What works
 
-| Document | Purpose |
-|---|---|
-| [Getting Started](docs/GETTING-STARTED.md) | Run the extension and follow the first-use flow |
-| [Implementation Status](docs/IMPLEMENTATION-STATUS.md) | Implemented, partial, and unverified capabilities |
-| [Vision](docs/VISION.md) | Why ROCKSOUL-EX exists |
-| [Product definition](docs/PRODUCT.md) | Users, promise, scope, and boundaries |
-| [Behavior DNA](docs/DNA.md) | Witness, Human Pen, Forge, and Proof |
-| [Visual & UX direction](docs/UX-DIRECTION.md) | Art direction and interface principles |
-| [Architecture](docs/ARCHITECTURE.md) | Extension layers and technical boundaries |
-| [Core workflows](docs/WORKFLOWS.md) | Inspection, missions, handoff, and proof |
-| [Security model](docs/SECURITY.md) | Workspace trust, privacy, and execution boundaries |
-| [Roadmap](docs/ROADMAP.md) | Milestones and remaining product work |
-| [Implementation backlog](docs/IMPLEMENTATION-BACKLOG.md) | Small tasks with acceptance criteria |
+- **Witness:** explicit, bounded, read-only workspace inspection; no scan runs automatically.
+- **Memory:** user-readable project DNA, architecture, decisions, missions, and handoffs in the project’s .rocksoul folder.
+- **Mission:** create, reopen, and update focused work with scope and acceptance criteria.
+- **Forge:** send selected context to the OpenAI Responses API; validate structured proposed changes against the mission scope; show native VS Code diffs.
+- **Human approval:** require a second approval before source files change; reject out-of-scope, secret, traversal, symlink, hard-link, binary, and oversized targets.
+- **Proof:** inspect npm scripts, approve one exact command, suppress automatic npm lifecycle hooks, run with timeout/cancellation, and retain bounded evidence.
 
-## What works now
+## Quick start
 
-- **Witness:** explicit, bounded, read-only text inspection; no scan runs automatically.
-- **Memory:** user-readable project DNA, architecture, decisions, missions, and handoffs in `.rocksoul/`.
-- **Mission:** create and maintain small work items with scope and acceptance criteria.
-- **Forge handoff:** copy an approved mission context pack to the clipboard for use with the AI assistant of your choice. No provider call is made.
-- **Proof:** inspect npm scripts, approve one exact command, run it in a trusted workspace, and store bounded evidence.
+Requirements: Visual Studio Code 1.90+, Node.js 20+ for repository tests, and an OpenAI API key only when using Forge.
 
-## Run and test
+Clone this repository, run npm test, and open the folder in VS Code. Press **F5** and select **ROCKSOUL-EX: Run Extension**. For full usage and configuration, read [Getting Started](docs/GETTING-STARTED.md).
 
-```bash
-npm test
-npm run check
-```
+## Privacy and trust
 
-Open the repository in VS Code, press `F5`, and follow [Getting Started](docs/GETTING-STARTED.md).
+ROCKSOUL-EX has no required server, database, login, telemetry, or background indexing. Project memory is local. The OpenAI API key is kept in VS Code SecretStorage. Before a provider request, the extension identifies the endpoint, model, and selected paths. Source excerpts are transmitted to the endpoint only after explicit approval. OpenAI API usage may incur charges under the user's API account.
+
+The extension respects Workspace Trust. Writes, provider requests, patch application, and command execution are disabled in Restricted Mode.
+
+## Quality and distribution
+
+- npm run check runs syntax checks and unit tests.
+- GitHub Actions tests Node 20 and 22.
+- An Extension Development Host smoke test runs in CI.
+- A VSIX package is built as a CI artifact.
+- A version tag triggers the GitHub Release workflow. Marketplace publishing requires a registered publisher and a configured Marketplace credential/OIDC trust.
+
+Read [Implementation Status](docs/IMPLEMENTATION-STATUS.md), [Security](SECURITY.md), and [Release Checklist](docs/RELEASE-CHECKLIST.md). A green CI run is necessary but not a substitute for a clean-profile manual installation and live-provider acceptance test.
 
 ## Product principles
 
 1. Understand before changing.
 2. Keep context durable and human-readable.
 3. Make work small, scoped, and reviewable.
-4. Separate implementation from verification.
+4. Separate patch application from command execution.
 5. Prove completion with evidence, not confident language.
-6. Keep humans in control of writes, provider disclosure, and command execution.
+6. Keep humans in control of provider disclosure, writes, and execution.
 7. Stay local-first and useful without an AI provider.
 
 ## Relationship to MoonWitness

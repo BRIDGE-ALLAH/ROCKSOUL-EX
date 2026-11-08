@@ -1,96 +1,45 @@
 # ROCKSOUL-EX — Product Roadmap
 
-## Delivery strategy
+## 0.2.0 — Forge and review
 
-Build in a sequence that proves product value before adding complexity. Each milestone must produce a usable capability and explicit evidence. Dates are intentionally omitted; progress is measured by acceptance criteria, not optimistic estimates.
+**Implemented in source; final CI/installation acceptance pending.**
 
-## M0 — Extension foundation
+- [x] OpenAI Responses API adapter and strict structured patch output.
+- [x] Secure API-key storage via VS Code SecretStorage.
+- [x] Endpoint/model/path disclosure before each provider request.
+- [x] Mission-scoped context and output limits.
+- [x] Patch path/scope validation and file snapshot capture.
+- [x] VS Code diff review, explicit apply/reject, apply-time stale-file checks.
+- [x] Separate patch application and verification evidence.
+- [x] npm script verification with approval, timeout, cancellation, and suppressed lifecycle hooks.
+- [x] CI workflow for Node 20/22, Extension Host smoke test, and VSIX artifact.
 
-**Status: implemented in 0.1.0; Extension Development Host smoke test pending.**
+## 0.3.0 — Reliability and repository intelligence
 
-- [x] JavaScript ESM extension manifest and entry point.
-- [x] Activity Bar container, native Missions Tree View, status item, commands, and Output channel.
-- [x] Dependency-free Node test runner and CI workflow.
-- [x] VS Code engine range and local setup guide.
-- [ ] Automated Extension Development Host activation test.
-- [ ] VSIX packaging validation.
+- [ ] Full .gitignore/.ignore support with tested precedence.
+- [ ] Git root, branch, working-tree and changed-file awareness.
+- [ ] Incremental scan cache with deterministic invalidation.
+- [ ] Multi-root workspace coverage and large-repository profiling.
+- [ ] Transactional or recoverable multi-file patch application.
+- [ ] Provider request retry/backoff and better usage/cost display.
+- [ ] Additional providers behind the same provider port.
+- [ ] Evidence-to-acceptance-criteria mapping.
 
-## M1 — THE WITNESS
+## 0.4.0 — Workflow maturity
 
-**Status: bounded inspection implemented; advanced repository semantics remain open.**
+- [ ] Mission decomposition and overlap detection.
+- [ ] Mission templates and project playbooks.
+- [ ] DNA freshness reports and links to canonical documents.
+- [ ] Additional verification runners beyond npm.
+- [ ] Review comments and patch checkpoints.
+- [ ] Richer accessibility, keyboard, and multi-theme audits.
 
-- [x] Resolve a selected workspace folder and report an empty-workspace state.
-- [x] Read-only directory walk with depth, file-count, per-file-size, and total-byte limits.
-- [x] Conservative secret, credential, dependency, generated-output, binary, and `.rocksoul` exclusions.
-- [x] Avoid symbolic links and present skipped-path reasons.
-- [x] Detect common manifests, likely source/test/docs roots, and file-type distribution.
-- [x] Present observed paths, heuristics, and limitations in a report.
-- [ ] Git root / branch / dirty-state inspection.
-- [ ] Full `.gitignore` semantics and incremental scan caching.
-- [ ] Large-monorepo performance profiling and cancellation hardening.
+## 1.x — Mature product
 
-## M2 — THE MEMORY
+- [ ] Release channels and stable migration policy.
+- [ ] Optional team sync after privacy/access model validation.
+- [ ] Optional MoonWitness knowledge bridge with clear data boundaries.
+- [ ] Optional local model adapter.
+- [ ] Marketplace adoption and extension compatibility telemetry only if explicitly designed and disclosed.
 
-**Status: local store and basic handoff implemented.**
-
-- [x] Bootstrap `.rocksoul/` after explicit confirmation.
-- [x] Create only missing files and preserve pre-existing content.
-- [x] Human-readable project DNA, architecture, decision, mission, and handoff files.
-- [x] Versioned JSON mission index and basic validation.
-- [x] Resume missions from local state after editor restart.
-- [ ] Semantic freshness checks for linked documentation.
-- [ ] Rich inspect/edit/delete affordances and data migration tests.
-
-## M3 — THE MISSION
-
-**Status: foundational mission lifecycle implemented.**
-
-- [x] Mission schema validation and state transition guard.
-- [x] Manual mission creation with scope and acceptance criteria.
-- [x] Native Missions Tree View and Markdown mission detail.
-- [x] Status updates that cannot skip directly from Draft to Verified.
-- [ ] AI decomposition, mission overlap detection, and richer review workflow.
-- [ ] Criterion-level evidence mapping and verified closure.
-
-## M4 — THE FORGE
-
-**Status: manual provider handoff implemented; automated provider and patch workflow deferred.**
-
-- [x] Build a bounded context pack from mission, DNA, architecture, decisions, and eligible project excerpts.
-- [x] Disclose context categories and copy to clipboard without network access.
-- [ ] Provider port and first API adapter.
-- [ ] Secure provider credentials using VS Code SecretStorage.
-- [ ] Structured patch proposal, scope validation, native diff preview, and approval-bound apply.
-
-## M5 — THE PROOF
-
-**Status: approved npm script runner and evidence log implemented.**
-
-- [x] Discover eligible npm scripts as suggestions only.
-- [x] Require Workspace Trust and explicit command approval.
-- [x] Execute one selected npm script with timeout and bounded output.
-- [x] Persist command, working directory, timestamps, exit code, status, and redacted output excerpt.
-- [ ] Additional package-manager and language-specific runners.
-- [ ] Evidence-to-criterion mapping and verified mission closure.
-- [ ] Security test fixtures for malicious scripts, output redaction, and cancellation.
-
-## M6 — EXPERIENCE HARDENING
-
-**Status: started.**
-
-- [x] Respect VS Code theme and use native controls.
-- [x] Add CI for Node 20 and 22 unit tests.
-- [ ] Accessibility and keyboard-navigation audit in Extension Development Host.
-- [ ] Test light/dark themes, large workspaces, and multi-root behavior.
-- [ ] VSIX packaging, installation, and clean uninstall validation.
-- [ ] Release automation and Marketplace metadata review.
-
-## Later exploration — not MVP commitments
-
-- Multiple provider adapters and optional local model support.
-- Optional MoonWitness knowledge bridge.
-- Mission templates and reusable project playbooks.
-- Multi-agent delegation with explicit role boundaries.
-- Team synchronization after a privacy and access model exists.
-
-These ideas must not delay a dependable single-developer workflow.
+Later work must not introduce a required backend or turn ROCKSOUL-EX into a generic dashboard. The editor, local context, human approval, and evidence remain central.

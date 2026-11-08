@@ -1,44 +1,50 @@
 # ROCKSOUL-EX — Implementation Status
 
-**Release line:** 0.1.0 · **Status:** working local-first MVP foundation
+**Release line:** 0.2.0 · **Status:** feature-complete candidate pending final CI, clean-profile installation, and live-provider acceptance
 
-This file distinguishes implemented code from planned provider and patch capabilities. A documented design is not evidence of a working feature.
+This document separates code implemented in the repository from release checks that still require an actual environment or publisher credential.
 
-## Implemented in this release line
+## Implemented
 
-- [x] JavaScript ESM VS Code extension manifest and activation entry point.
-- [x] Activity Bar container, Missions Tree View, status item, Command Palette commands, and Output channel.
-- [x] Bounded read-only workspace inspection with depth, file-count, per-file-size, and total-byte limits.
-- [x] Conservative secret/dependency/generated-path exclusions and custom exclusion setting.
-- [x] Symbolic-link avoidance for project inspection and `.rocksoul` nested storage paths, plus a UTF-8 text-file allowlist.
-- [x] Human-readable witness report with observed paths, heuristics, skips, and limits.
-- [x] Explicitly confirmed `.rocksoul/` bootstrap that never overwrites existing files.
-- [x] Local mission creation, validation, Markdown record, JSON index, and guarded status transitions.
-- [x] Mission prompt pack copied to clipboard after context-disclosure confirmation; no provider API is called.
-- [x] Session handoff document.
-- [x] Approved npm script execution in trusted workspaces with timeout, bounded/redacted output, and evidence persistence.
-- [x] Node built-in unit tests and GitHub Actions CI for Node 20 and 22.
+- [x] JavaScript ESM VS Code package and activation entry point.
+- [x] Activity Bar, Mission Tree View, status item, Command Palette commands, and Output channel.
+- [x] Workspace Trust capability declaration with limited Restricted Mode support.
+- [x] Bounded, read-only inspection with depth, file count, per-file bytes, total bytes, symlink avoidance, path exclusions, and skipped-path report.
+- [x] Project memory bootstrap that creates missing files only and preserves existing files.
+- [x] Nested storage symlink safeguards and non-creating read-only lookups.
+- [x] Mission schema, Markdown records, versioned JSON index, and allowed status transitions.
+- [x] OpenAI Responses API adapter with strict Structured Outputs schema, configurable model/endpoint, timeout, and request cancellation.
+- [x] API-key management via VS Code SecretStorage.
+- [x] Explicit disclosure of provider endpoint, model, and selected context paths.
+- [x] Mission context pack with file/path scope selection and secret exclusions.
+- [x] Patch proposal validation for path traversal, scope, duplicate paths, secret exclusions, text allowlist, size, symlink/hard-link targets, and create/update semantics.
+- [x] Diff previews in VS Code before application.
+- [x] Second explicit approval before applying a patch.
+- [x] Apply-time snapshot/hash revalidation to avoid overwriting files changed since proposal creation.
+- [x] Separate patch-application evidence from verification evidence.
+- [x] Local session handoff.
+- [x] Approved npm script execution with pre/post lifecycle hooks suppressed, timeout/cancellation, bounded output, and evidence records.
+- [x] Node unit tests, syntax check script, Extension Development Host smoke test, CI matrix, VSIX artifact job, and tag-based GitHub Release workflow definitions.
 
-## Partially implemented / constrained
+## Known limits
 
-- [ ] **Witness:** Git root, `.gitignore` semantic matching, language-specific project graph, and large-monorepo incremental caching are not implemented.
-- [ ] **Memory:** DNA/decision documents are human-editable; semantic freshness checks and linked-document indexing are not implemented.
-- [ ] **Mission:** mission create/open/status is implemented; AI decomposition, overlap detection, and rich native mission detail are not.
-- [ ] **Forge:** clipboard-based provider handoff is implemented; API provider adapter, SecretStorage credentials, proposed-patch schema, native diff preview, and approval-bound apply are not.
-- [ ] **Proof:** approved npm script execution and evidence recording are implemented; non-npm runners, criterion-to-evidence mapping, and verified-closure workflow are not.
-- [ ] **Release:** package metadata and ignore rules exist; VSIX packaging, Marketplace publication, and automated Extension Development Host test are not yet verified.
+- [ ] Witness does not yet implement complete .gitignore semantics, Git root/branch/dirty-state discovery, or incremental scan caching.
+- [ ] DNA documents are editable human-owned records; semantic freshness checks and linked-document indexing are not implemented.
+- [ ] Mission overlap detection and AI-assisted decomposition are not implemented.
+- [ ] Patch application is not transactional across multiple files. If a later save fails, some edits may already have been applied; inspect Source Control before retrying.
+- [ ] Proof only discovers npm scripts. It does not support other package managers or language-specific runners yet.
+- [ ] Proof records a command result but does not map every acceptance criterion to independent evidence; a mission is not automatically marked Verified.
+- [ ] Extension Host CI is a smoke test, not full GUI/manual QA.
+- [ ] Marketplace publication requires a registered publisher and valid OIDC trust or Marketplace PAT.
+- [ ] A live provider request must be tested by the release owner using their own API account; this repository contains no API key.
 
-## Release integrity
+## Release gates
 
-A command is never marked as passed unless its process exits with code 0. A successful command is not equivalent to verified mission acceptance. The extension does not perform AI requests, modify source files, or run scripts automatically.
+1. Latest pull-request CI is green on Node 20 and 22.
+2. Extension Development Host smoke test passes.
+3. VSIX packaging job succeeds and the artifact is downloadable.
+4. Release owner installs the VSIX in a clean VS Code profile and validates inspection, memory, mission, provider disclosure, proposal diff, apply/reject, and verification.
+5. Release owner validates a real provider request and API billing behavior.
+6. The Marketplace publisher identity and publishing credential/OIDC trust are verified before Marketplace publication.
 
-## Manual validation still required
-
-1. Open the repository in VS Code and press `F5`.
-2. Confirm the Activity Bar view and commands appear.
-3. Inspect a fixture containing fake secret files and confirm the report shows them as skipped.
-4. Bootstrap memory over a workspace with pre-existing `.rocksoul` files and verify they remain untouched.
-5. Create a mission, restart the Extension Development Host, and reopen it.
-6. Copy a mission prompt and confirm the clipboard contains only allowed excerpts.
-7. Run a harmless fixture npm script after approving it, then inspect `.rocksoul/evidence/index.json`.
-8. Test rejection in an untrusted workspace.
+Do not describe the extension as Marketplace-published unless Marketplace confirms the published version.
