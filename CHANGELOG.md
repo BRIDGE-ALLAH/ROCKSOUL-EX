@@ -16,8 +16,9 @@ All notable ROCKSOUL-EX changes are recorded here.
 - Failed, cancelled, unreviewed, or stale-criterion evidence cannot satisfy the proof matrix.
 
 ### Release gates
-- CI, Extension Host smoke test, and VSIX artifact must pass on the PR commit.
-- Clean-profile transaction/recovery and evidence-matrix behavior still require manual release-owner acceptance.
+- [x] PR CI passed on Node 20/22, Extension Host smoke test passed, and the v0.3.0 VSIX is published on GitHub Releases.
+- [ ] Clean-profile transaction/recovery and evidence-matrix behavior still require manual release-owner acceptance.
+- [ ] Marketplace publication requires publisher credentials or trusted OIDC; this workflow skipped Marketplace publishing.
 
 ## 0.2.1 — Marketplace publisher identity
 

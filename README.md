@@ -10,7 +10,7 @@ ROCKSOUL-EX is a local-first Visual Studio Code engineering companion. It connec
 
 ## Current release line
 
-**0.3.0 — Reliability engines candidate.** ROCKSOUL-EX includes the local-first Witness, Memory, Mission, and Proof foundation plus an OpenAI Responses API adapter, SecretStorage credentials, mission-scoped structured patch proposals, diff preview, and a second explicit approval before applying changes.
+**0.3.0 — Reliability engines.** The GitHub Release is published with an installable VSIX; Marketplace publication remains a separate credential-gated step. ROCKSOUL-EX includes the local-first Witness, Memory, Mission, and Proof foundation plus an OpenAI Responses API adapter, SecretStorage credentials, mission-scoped structured patch proposals, diff preview, and a second explicit approval before applying changes.
 
 The AI provider integration sends only the selected mission context after a disclosure prompt. The model never has direct file-system or shell access. A successful command or patch application does not automatically verify a mission.
 

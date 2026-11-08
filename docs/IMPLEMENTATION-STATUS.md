@@ -1,6 +1,6 @@
 # ROCKSOUL-EX — Implementation Status
 
-**Release line:** 0.3.0 candidate · **Repository state:** feature branch / PR validation pending · **Marketplace:** not verified as published
+**Release line:** 0.3.0 · **GitHub Release:** published with installable VSIX · **Marketplace:** not published by this workflow (publisher credential/OIDC not configured)
 
 This document separates implementation in source from checks that require GitHub CI, a clean VS Code profile, a live provider account, or publisher credentials.
 
@@ -41,9 +41,9 @@ This document separates implementation in source from checks that require GitHub
 
 ## Release gates
 
-1. Latest pull-request CI green on Node 20 and 22.
-2. Extension Development Host smoke test passes.
-3. VSIX packaging job succeeds and the artifact is downloadable.
+1. [x] PR CI green on Node 20 and 22 (PR #4).
+2. [x] Extension Development Host smoke test passes.
+3. [x] VSIX packaging job succeeds; v0.3.0 asset is available on the GitHub Release.
 4. Clean-profile manual test covers inspection, nested ignore rules, mission creation, provider disclosure, diff review, apply/reject, transaction recovery, evidence mapping, and Verified gating.
 5. A live provider round-trip is tested using non-sensitive fixture content.
 6. Marketplace publication is reported only after the Marketplace confirms the published version.
