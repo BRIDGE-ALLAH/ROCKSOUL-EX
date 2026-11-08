@@ -10,7 +10,7 @@ test('unit test discovery is explicit and does not launch the VS Code host runne
   assert.equal(manifest.scripts['test:extension'], 'node test/extension/run-tests.js');
   assert.equal(manifest.publisher, 'MohRezzaFahlevi');
   const lock = JSON.parse(await readFile(new URL('../package-lock.json', import.meta.url), 'utf8'));
-  assert.equal(manifest.version, '0.2.1');
+  assert.equal(manifest.version, '0.3.0');
   assert.equal(manifest.version, lock.version);
   assert.equal(manifest.version, lock.packages[''].version);
 });

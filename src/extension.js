@@ -4,14 +4,15 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { inspectWorkspace, renderInspectionReport } from './infrastructure/workspace-inspector.js';
-import { bootstrapStore, readStoreFile, listMissions, openMissionRecord, saveHandoff, appendEvidence } from './infrastructure/rocksoul-store.js';
+import { bootstrapStore, readStoreFile, listMissions, openMissionRecord, saveHandoff, appendEvidence, listEvidence } from './infrastructure/rocksoul-store.js';
 import { createMission, changeMissionStatus, loadMissionDetails } from './application/mission-service.js';
 import { MISSION_STATUSES, canTransition } from './domain/mission.js';
 import { buildMissionContext } from './application/forge-service.js';
 import { requestPatchProposal } from './providers/openai-responses.js';
 import { validatePatchProposal, revalidatePatchSnapshot } from './security/change-policy.js';
 import { savePendingProposal, updatePendingProposal, listPendingProposals, getPendingProposal, deletePendingProposal, createProposalPreviews, deleteProposalPreviews } from './infrastructure/proposal-store.js';
-import { isPathInside } from './domain/policy.js';
+import { applyFileTransaction, listIncompleteTransactions, recoverFileTransaction } from './infrastructure/forge-transaction.js';
+import { buildEvidenceMatrix, createCriterionReviews } from './application/proof-service.js';
 
 const OUTPUT_NAME = 'ROCKSOUL-EX';
 const MAX_PROMPT_CHARS = 24000;
@@ -79,8 +80,10 @@ export function activate(context) {
   register(context, 'rocksoul.reviewPatch', () => reviewPatchProposal(context));
   register(context, 'rocksoul.applyPatch', () => applyPatchProposal(context));
   register(context, 'rocksoul.rejectPatch', () => rejectPatchProposal(context));
+  register(context, 'rocksoul.recoverForgeTransactions', () => recoverForgeTransactions(context));
   register(context, 'rocksoul.refreshMissions', () => treeProvider.refresh());
   output.appendLine('Activated. No workspace scan, provider call, or command execution occurs automatically.');
+  void notifyInterruptedTransactions(context);
 }
 
 export function deactivate() {
@@ -116,7 +119,9 @@ function getScanOptions() {
     maxFiles: config.get('maxFiles', 400),
     maxFileBytes: config.get('maxFileBytes', 131072),
     maxTotalBytes: config.get('maxTotalBytes', 1048576),
-    excludedPaths: config.get('excludedPaths', [])
+    excludedPaths: config.get('excludedPaths', []),
+    respectGitignore: config.get('respectGitignore', true),
+    incremental: config.get('incremental', true)
   };
 }
 
@@ -300,6 +305,7 @@ async function verifyMission() {
   if (!eligibleMissions.length) { vscode.window.showInformationMessage('No mission is ready for verification. Create one or move an existing mission to Ready.'); return; }
   const selected = await vscode.window.showQuickPick(eligibleMissions.map((mission) => ({ label: mission.title, description: mission.status, mission })), { placeHolder: 'Choose a mission ready for verification' });
   if (!selected) return;
+  const mission = await loadMissionDetails(folder.uri.fsPath, selected.mission.id);
   const manifestPath = path.join(folder.uri.fsPath, 'package.json');
   let manifest;
   try { manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8')); }
@@ -317,11 +323,11 @@ async function verifyMission() {
   const config = vscode.workspace.getConfiguration('rocksoul.verification');
   const timeoutMs = Math.min(600, Math.max(5, config.get('timeoutSeconds', 120))) * 1000;
   const maxOutputBytes = Math.min(131072, Math.max(1024, config.get('maxOutputBytes', 16384)));
-  const restoreStatus = selected.mission.status === 'Implemented' ? 'Implemented' : 'In Progress';
-  if (['Ready', 'Failed', 'Blocked', 'Deferred'].includes(selected.mission.status)) {
-    await changeMissionStatus(folder.uri.fsPath, selected.mission.id, 'In Progress');
+  const restoreStatus = mission.status === 'Implemented' ? 'Implemented' : 'In Progress';
+  if (['Ready', 'Failed', 'Blocked', 'Deferred'].includes(mission.status)) {
+    await changeMissionStatus(folder.uri.fsPath, mission.id, 'In Progress');
   }
-  await changeMissionStatus(folder.uri.fsPath, selected.mission.id, 'Verifying');
+  await changeMissionStatus(folder.uri.fsPath, mission.id, 'Verifying');
   treeProvider.refresh();
   const startedAt = new Date().toISOString();
   const result = await vscode.window.withProgress(
@@ -331,7 +337,7 @@ async function verifyMission() {
   const finishedAt = new Date().toISOString();
   const evidence = {
     id: `proof-${randomUUID().slice(0, 12)}`,
-    missionId: selected.mission.id,
+    missionId: mission.id,
     command: `npm --ignore-scripts run ${chosen.name}`,
     cwd: folder.uri.fsPath,
     startedAt,
@@ -339,25 +345,72 @@ async function verifyMission() {
     durationMs: result.durationMs,
     exitCode: result.exitCode,
     status: result.timedOut ? 'timeout' : result.cancelled ? 'cancelled' : result.exitCode === 0 ? 'passed' : 'failed',
-    output: redactOutput(result.output, maxOutputBytes)
+    output: redactOutput(result.output, maxOutputBytes),
+    criterionReviews: []
   };
+
+  if (evidence.status === 'passed') {
+    const existingEvidence = await listEvidence(folder.uri.fsPath, mission.id);
+    const matrixBefore = buildEvidenceMatrix(mission, existingEvidence);
+    const choices = mission.acceptanceCriteria.map((criterion, index) => ({
+      label: `${index + 1}. ${criterion}`,
+      description: matrixBefore.criteria[index]?.covered
+        ? `Already supported by ${matrixBefore.criteria[index].evidenceIds.length} passing evidence record(s)`
+        : 'Not yet supported by reviewed evidence',
+      index
+    }));
+    const selectedCriteria = await vscode.window.showQuickPick(choices, {
+      canPickMany: true,
+      placeHolder: 'Select only the acceptance criteria this successful command actually proves'
+    });
+    if (selectedCriteria?.length) {
+      const mappingApproved = await vscode.window.showWarningMessage(
+        `Confirm evidence mapping for ${evidence.command}?\n\n${selectedCriteria.map((item) => `• ${item.label}`).join('\n')}\n\nYou confirm that you reviewed the command output and that it supports these criteria.`,
+        { modal: true },
+        'Confirm Mapping'
+      );
+      if (mappingApproved === 'Confirm Mapping') {
+        evidence.criterionReviews = createCriterionReviews(mission.acceptanceCriteria, selectedCriteria.map((item) => item.index));
+      }
+    }
+  }
+
   await appendEvidence(folder.uri.fsPath, evidence);
   output.appendLine(`[proof] ${evidence.command} — ${evidence.status} (exit ${evidence.exitCode ?? 'unknown'}, ${evidence.durationMs} ms)`);
   output.appendLine(evidence.output);
   if (evidence.status === 'passed') {
-    await changeMissionStatus(folder.uri.fsPath, selected.mission.id, 'Implemented');
-    const action = await vscode.window.showInformationMessage(`Verification command passed. Evidence saved as ${evidence.id}. Mission is Implemented, not Verified: acceptance criteria still need review.`, 'Review Mission');
-    if (action === 'Review Mission') await openMission(selected.mission.id);
+    await changeMissionStatus(folder.uri.fsPath, mission.id, 'Implemented');
+    const matrix = buildEvidenceMatrix(mission, await listEvidence(folder.uri.fsPath, mission.id));
+    if (matrix.complete) {
+      const confirmVerified = await vscode.window.showWarningMessage(
+        `All ${matrix.total} acceptance criteria have passing, explicitly reviewed evidence. Mark this mission Verified?`,
+        { modal: true },
+        'Mark Verified'
+      );
+      if (confirmVerified === 'Mark Verified') {
+        await changeMissionStatus(folder.uri.fsPath, mission.id, 'Verifying');
+        await changeMissionStatus(folder.uri.fsPath, mission.id, 'Verified');
+        vscode.window.showInformationMessage(`Mission Verified. Every acceptance criterion is linked to reviewed passing evidence.`);
+      } else {
+        vscode.window.showInformationMessage('Evidence matrix is complete. Mission remains Implemented until you explicitly mark it Verified.');
+      }
+    } else {
+      const missing = matrix.missing.slice(0, 3).map((item) => `• ${item.criterion}`).join('\n');
+      const suffix = matrix.missing.length > 3 ? `\n• and ${matrix.missing.length - 3} more` : '';
+      vscode.window.showInformationMessage(
+        `Evidence saved. ${matrix.covered}/${matrix.total} criteria have reviewed passing evidence. Mission remains Implemented.\n\nStill missing:\n${missing}${suffix}`,
+        'Review Mission'
+      ).then((action) => { if (action === 'Review Mission') void openMission(mission.id); });
+    }
   } else if (evidence.status === 'cancelled') {
-    await changeMissionStatus(folder.uri.fsPath, selected.mission.id, restoreStatus).catch(() => {});
+    await changeMissionStatus(folder.uri.fsPath, mission.id, restoreStatus).catch(() => {});
     vscode.window.showInformationMessage(`Verification cancelled. No pass was recorded. Evidence saved as ${evidence.id}.`);
   } else {
-    await changeMissionStatus(folder.uri.fsPath, selected.mission.id, 'Failed').catch(() => {});
+    await changeMissionStatus(folder.uri.fsPath, mission.id, 'Failed').catch(() => {});
     vscode.window.showWarningMessage(`Verification ${evidence.status}. Evidence saved; inspect the ROCKSOUL-EX Output channel.`);
   }
   treeProvider.refresh();
 }
-
 async function setOpenAiApiKey(context) {
   const value = await vscode.window.showInputBox({
     title: 'ROCKSOUL-EX · Secure provider setup',
@@ -561,60 +614,87 @@ async function applySpecificPatchProposal(context, folder, proposalId) {
   if (path.resolve(proposal.workspaceRoot) !== path.resolve(folder.uri.fsPath)) throw new Error('The selected proposal belongs to a different workspace.');
   const fileList = proposal.changes.map((change) => `• ${change.operation.toUpperCase()} ${change.path}`).join('\n');
   const approved = await vscode.window.showWarningMessage(
-    `Apply this reviewed patch to the workspace?\n\n${fileList}\n\nThe files will be changed on disk. Verification is a separate step.`,
+    `Apply this reviewed patch as one recoverable transaction?\n\n${fileList}\n\nROCKSOUL-EX will create a durable journal and backups before writing. Verification is separate.`,
     { modal: true },
     'Apply Patch'
   );
   if (approved !== 'Apply Patch') return;
   await revalidatePatchSnapshot(folder.uri.fsPath, proposal);
-  const edit = new vscode.WorkspaceEdit();
-  const targetUris = [];
   for (const change of proposal.changes) {
     const absolutePath = path.resolve(folder.uri.fsPath, ...change.path.split('/'));
-    if (!isPathInside(folder.uri.fsPath, absolutePath)) throw new Error(`Refusing to write outside the workspace: ${change.path}`);
-    const uri = vscode.Uri.file(absolutePath);
-    targetUris.push(uri);
-    if (change.operation === 'create') {
-      edit.createFile(uri, { overwrite: false, ignoreIfExists: false });
-      edit.insert(uri, new vscode.Position(0, 0), change.content);
-    } else {
-      const document = await vscode.workspace.openTextDocument(uri);
-      if (document.isDirty) throw new Error(`The open editor has unsaved changes: ${change.path}. Save or discard them and generate a fresh proposal.`);
-      if (document.getText() !== change.beforeContent) throw new Error(`The editor content changed since the proposal was generated: ${change.path}.`);
-      edit.replace(uri, new vscode.Range(new vscode.Position(0, 0), document.positionAt(document.getText().length)), change.content);
+    const document = vscode.workspace.textDocuments.find((item) => item.uri.scheme === 'file' && path.resolve(item.uri.fsPath) === absolutePath);
+    if (document?.isDirty) throw new Error(`The open editor has unsaved changes: ${change.path}. Save or discard them and generate a fresh proposal.`);
+    if (document && document.getText() !== (change.beforeContent ?? '')) {
+      throw new Error(`The editor content changed since the proposal was generated: ${change.path}.`);
     }
   }
-  const applied = await vscode.workspace.applyEdit(edit);
-  if (!applied) throw new Error('VS Code could not apply the patch. No verification has been run.');
-  const savedPaths = [];
-  for (let index = 0; index < targetUris.length; index += 1) {
-    const document = await vscode.workspace.openTextDocument(targetUris[index]);
-    if (!await document.save()) {
-      throw new Error(`The patch was applied in the editor but could not be saved to disk: ${proposal.changes[index].path}. Review Source Control for a partial result.`);
-    }
-    savedPaths.push(proposal.changes[index].path);
-  }
+  const journalDirectory = path.join(context.globalStorageUri.fsPath, 'transactions');
+  const transaction = await applyFileTransaction(folder.uri.fsPath, proposal.changes, journalDirectory);
   const evidence = {
     id: `apply-${randomUUID().slice(0, 12)}`,
     missionId: proposal.missionId,
-    command: 'ROCKSOUL-EX approved patch apply',
+    command: 'ROCKSOUL-EX approved Forge transaction',
     cwd: folder.uri.fsPath,
     startedAt: proposal.savedAt,
     finishedAt: new Date().toISOString(),
     status: 'applied',
-    changedPaths: savedPaths,
+    transactionId: transaction.transactionId,
+    changedPaths: transaction.paths,
     output: proposal.summary
   };
   await appendEvidence(folder.uri.fsPath, evidence);
   await changeMissionStatus(folder.uri.fsPath, proposal.missionId, 'Implemented').catch((error) => {
-    output.appendLine(`[forge] Patch applied; mission state update failed: ${error.message}`);
+    output.appendLine(`[forge] Patch committed; mission state update failed: ${error.message}`);
   });
   await deletePendingProposal(context, proposalId);
   await deleteProposalPreviews(context, proposalId);
   treeProvider.refresh();
-  vscode.window.showInformationMessage(`Patch applied to ${savedPaths.length} file(s). Mission is Implemented, not Verified. Run approved verification separately.`);
+  vscode.window.showInformationMessage(`Forge transaction ${transaction.transactionId} committed to ${transaction.paths.length} file(s). Journal and backups are retained for crash recovery. Mission is Implemented, not Verified.`);
 }
 
+async function notifyInterruptedTransactions(context) {
+  if (!vscode.workspace.isTrusted) return;
+  try {
+    const pending = await listIncompleteTransactions(path.join(context.globalStorageUri.fsPath, 'transactions'));
+    if (!pending.length) return;
+    const action = await vscode.window.showWarningMessage(
+      `ROCKSOUL-EX found ${pending.length} interrupted Forge transaction(s). Workspace files will not be changed until you review recovery.`,
+      'Review Recovery'
+    );
+    if (action === 'Review Recovery') await recoverForgeTransactions(context);
+  } catch (error) {
+    output.appendLine(`[forge-recovery] Could not inspect transaction journal: ${error.message}`);
+  }
+}
+
+async function recoverForgeTransactions(context) {
+  if (!vscode.workspace.isTrusted) {
+    vscode.window.showWarningMessage('Workspace Trust is required before recovering Forge transactions.');
+    return;
+  }
+  const directory = path.join(context.globalStorageUri.fsPath, 'transactions');
+  const pending = await listIncompleteTransactions(directory);
+  if (!pending.length) {
+    vscode.window.showInformationMessage('No interrupted Forge transactions require recovery.');
+    return;
+  }
+  const selected = await vscode.window.showQuickPick(pending.map((item) => ({
+    label: item.id,
+    description: `${item.state} · ${item.paths.length} file(s) · ${item.workspaceRoot}`,
+    item
+  })), { placeHolder: 'Choose an interrupted transaction to inspect and roll back' });
+  if (!selected) return;
+  const approved = await vscode.window.showWarningMessage(
+    `Roll back the interrupted transaction?\n\nWorkspace: ${selected.item.workspaceRoot}\nFiles:\n${selected.item.paths.map((item) => `• ${item}`).join('\n')}\n\nFiles that no longer match either the before or after snapshot will be left untouched and reported as conflicts.`,
+    { modal: true },
+    'Roll Back Transaction'
+  );
+  if (approved !== 'Roll Back Transaction') return;
+  const result = await recoverFileTransaction(directory, selected.item.id);
+  output.appendLine(`[forge-recovery] ${result.transactionId}: ${result.state}; conflicts: ${result.conflicts.join(', ') || 'none'}`);
+  if (result.state === 'rolled-back') vscode.window.showInformationMessage(`Transaction ${result.transactionId} was rolled back safely.`);
+  else vscode.window.showWarningMessage(`Transaction ${result.transactionId} still needs manual attention. Conflicting files were not overwritten: ${result.conflicts.join(', ')}`);
+}
 async function rejectPatchProposal(context) {
   const folder = await chooseWorkspaceFolder();
   if (!folder) return;
