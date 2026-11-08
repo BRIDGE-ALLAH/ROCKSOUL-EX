@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { inspectWorkspace, renderInspectionReport } from './infrastructure/workspace-inspector.js';
 import { bootstrapStore, readStoreFile, listMissions, openMissionRecord, saveHandoff, appendEvidence } from './infrastructure/rocksoul-store.js';
 import { createMission, changeMissionStatus } from './application/mission-service.js';
-import { MISSION_STATUSES } from './domain/mission.js';
+import { MISSION_STATUSES, canTransition } from './domain/mission.js';
 
 const OUTPUT_NAME = 'ROCKSOUL-EX';
 const MAX_PROMPT_CHARS = 24000;
@@ -210,7 +210,7 @@ async function updateMissionStatus() {
   if (!missions.length) { vscode.window.showInformationMessage('No missions yet. Create one first.'); return; }
   const selected = await vscode.window.showQuickPick(missions.map((mission) => ({ label: mission.title, description: `${mission.status} · ${mission.id}`, mission })), { placeHolder: 'Choose a mission' });
   if (!selected) return;
-  const statuses = MISSION_STATUSES.filter((status) => !['Verified', 'Verifying', 'Failed'].includes(status));
+  const statuses = MISSION_STATUSES.filter((status) => !['Verified', 'Verifying', 'Failed'].includes(status) && canTransition(selected.mission.status, status));
   const next = await vscode.window.showQuickPick(statuses.map((label) => ({ label })), { placeHolder: `Current: ${selected.mission.status}. Choose the next state.` });
   if (!next) return;
   await changeMissionStatus(folder.uri.fsPath, selected.mission.id, next.label);
@@ -282,7 +282,8 @@ async function verifyMission() {
   if (!vscode.workspace.isTrusted) { vscode.window.showWarningMessage('Workspace Trust is required before running any project command.'); return; }
   const missions = await listMissions(folder.uri.fsPath);
   if (!missions.length) { vscode.window.showInformationMessage('Create a mission before recording verification evidence.'); return; }
-  const selected = await vscode.window.showQuickPick(missions.filter((mission) => !['Closed', 'Deferred'].includes(mission.status)).map((mission) => ({ label: mission.title, description: mission.status, mission })), { placeHolder: 'Choose the mission this evidence relates to' });
+  const eligibleMissions = missions.filter((mission) => ['Ready', 'In Progress', 'Implemented', 'Failed', 'Blocked', 'Deferred'].includes(mission.status));
+  const selected = await vscode.window.showQuickPick(eligibleMissions.map((mission) => ({ label: mission.title, description: mission.status, mission })), { placeHolder: 'Choose a mission ready for verification' });
   if (!selected) return;
   const manifestPath = path.join(folder.uri.fsPath, 'package.json');
   let manifest;
