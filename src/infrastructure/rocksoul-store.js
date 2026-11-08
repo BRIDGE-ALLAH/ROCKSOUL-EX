@@ -22,20 +22,58 @@ function safeStorePath(root, relativePath) {
 }
 
 async function ensureStoreDirectory(root) {
-  const storeRoot = path.join(root, '.rocksoul');
+  const storeRoot = path.resolve(root, '.rocksoul');
   try {
     const stat = await fs.lstat(storeRoot);
     if (stat.isSymbolicLink() || !stat.isDirectory()) throw new Error('.rocksoul exists but is not a normal directory. Refusing to write.');
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
-    await fs.mkdir(storeRoot, { recursive: false });
+    await fs.mkdir(storeRoot, { mode: 0o700 });
   }
   return storeRoot;
 }
 
+async function resolveSafeTarget(root, relativePath, createParents = false) {
+  const { storeRoot, target } = safeStorePath(root, relativePath);
+  if (createParents) {
+    await ensureStoreDirectory(root);
+  } else {
+    try {
+      const stat = await fs.lstat(storeRoot);
+      if (stat.isSymbolicLink() || !stat.isDirectory()) throw new Error('.rocksoul is not a normal directory. Refusing to follow it.');
+    } catch (error) {
+      if (error.code === 'ENOENT') return { storeRoot, target };
+      throw error;
+    }
+  }
+  const parentRelative = path.relative(storeRoot, path.dirname(target));
+  let current = storeRoot;
+  for (const segment of parentRelative.split(path.sep).filter(Boolean)) {
+    current = path.join(current, segment);
+    try {
+      const stat = await fs.lstat(current);
+      if (stat.isSymbolicLink() || !stat.isDirectory()) {
+        throw new Error(`Refusing to follow a non-directory or symbolic link inside .rocksoul: ${segment}`);
+      }
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      if (!createParents) return { storeRoot, target };
+      await fs.mkdir(current, { mode: 0o700 });
+    }
+  }
+  try {
+    const stat = await fs.lstat(target);
+    if (stat.isSymbolicLink()) throw new Error(`Refusing to follow a symbolic link inside .rocksoul: ${relativePath}`);
+    if (!stat.isFile()) throw new Error(`Expected a regular file inside .rocksoul: ${relativePath}`);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  return { storeRoot, target };
+}
+
 async function atomicWrite(target, content) {
   const tempPath = `${target}.${randomUUID()}.tmp`;
-  await fs.writeFile(tempPath, content, { encoding: 'utf8', flag: 'wx' });
+  await fs.writeFile(tempPath, content, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
   await fs.rename(tempPath, target);
 }
 
@@ -44,10 +82,9 @@ export async function bootstrapStore(root) {
   const created = [];
   const existing = [];
   for (const [relativePath, content] of Object.entries(DEFAULT_FILES)) {
-    const { target } = safeStorePath(root, relativePath);
-    await fs.mkdir(path.dirname(target), { recursive: true });
+    const { target } = await resolveSafeTarget(root, relativePath, true);
     try {
-      await fs.writeFile(target, content, { encoding: 'utf8', flag: 'wx' });
+      await fs.writeFile(target, content, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
       created.push(relativePath);
     } catch (error) {
       if (error.code === 'EEXIST') existing.push(relativePath);
@@ -58,7 +95,7 @@ export async function bootstrapStore(root) {
 }
 
 export async function readStoreFile(root, relativePath) {
-  const { target } = safeStorePath(root, relativePath);
+  const { target } = await resolveSafeTarget(root, relativePath);
   try { return await fs.readFile(target, 'utf8'); }
   catch (error) { if (error.code === 'ENOENT') return null; throw error; }
 }
@@ -74,8 +111,7 @@ export async function listMissions(root) {
 }
 
 async function saveMissionIndex(root, missions) {
-  const { target } = safeStorePath(root, 'missions/index.json');
-  await fs.mkdir(path.dirname(target), { recursive: true });
+  const { target } = await resolveSafeTarget(root, 'missions/index.json', true);
   const content = `${JSON.stringify({ version: 1, missions }, null, 2)}\n`;
   await atomicWrite(target, content);
 }
@@ -84,9 +120,8 @@ export async function createMissionRecord(root, mission) {
   const missions = await listMissions(root);
   if (missions.some((item) => item.id === mission.id)) throw new Error(`Mission ${mission.id} already exists.`);
   const missionPath = `missions/${mission.id}.md`;
-  const { target } = safeStorePath(root, missionPath);
-  await fs.mkdir(path.dirname(target), { recursive: true });
-  await fs.writeFile(target, missionMarkdown(mission), { encoding: 'utf8', flag: 'wx' });
+  const { target } = await resolveSafeTarget(root, missionPath, true);
+  await fs.writeFile(target, missionMarkdown(mission), { encoding: 'utf8', flag: 'wx', mode: 0o600 });
   try {
     await saveMissionIndex(root, [{ id: mission.id, title: mission.title, status: mission.status, createdAt: mission.createdAt, updatedAt: mission.updatedAt, path: missionPath }, ...missions]);
   } catch (error) {
@@ -101,7 +136,7 @@ export async function updateMissionRecord(root, mission) {
   const index = missions.findIndex((item) => item.id === mission.id);
   if (index < 0) throw new Error(`Mission ${mission.id} was not found in the index.`);
   const missionPath = missions[index].path;
-  const { target } = safeStorePath(root, missionPath);
+  const { target } = await resolveSafeTarget(root, missionPath);
   const existing = await fs.readFile(target, 'utf8');
   if (!existing.startsWith(GENERATED_MARKER)) throw new Error('Mission file no longer has the ROCKSOUL-EX ownership marker. Update cancelled to preserve manual content.');
   await atomicWrite(target, missionMarkdown(mission));
@@ -114,14 +149,13 @@ export async function openMissionRecord(root, missionId) {
   const missions = await listMissions(root);
   const record = missions.find((item) => item.id === missionId);
   if (!record) throw new Error(`Mission ${missionId} was not found.`);
-  const { target } = safeStorePath(root, record.path);
+  const { target } = await resolveSafeTarget(root, record.path);
   return { record, content: await fs.readFile(target, 'utf8') };
 }
 
 export async function saveHandoff(root, content) {
   const relativePath = 'sessions/latest.md';
-  const { target } = safeStorePath(root, relativePath);
-  await fs.mkdir(path.dirname(target), { recursive: true });
+  const { target } = await resolveSafeTarget(root, relativePath, true);
   try {
     const existing = await fs.readFile(target, 'utf8');
     if (!existing.startsWith(GENERATED_MARKER)) throw new Error('Existing sessions/latest.md is not ROCKSOUL-owned. It was left untouched.');
@@ -134,8 +168,7 @@ export async function saveHandoff(root, content) {
 
 export async function appendEvidence(root, evidence) {
   const relativePath = 'evidence/index.json';
-  const { target } = safeStorePath(root, relativePath);
-  await fs.mkdir(path.dirname(target), { recursive: true });
+  const { target } = await resolveSafeTarget(root, relativePath, true);
   let records = [];
   try {
     const parsed = JSON.parse(await fs.readFile(target, 'utf8'));

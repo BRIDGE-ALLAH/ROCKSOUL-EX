@@ -10,7 +10,7 @@ This file distinguishes implemented code from planned provider and patch capabil
 - [x] Activity Bar container, Missions Tree View, status item, Command Palette commands, and Output channel.
 - [x] Bounded read-only workspace inspection with depth, file-count, per-file-size, and total-byte limits.
 - [x] Conservative secret/dependency/generated-path exclusions and custom exclusion setting.
-- [x] Symbolic-link avoidance and UTF-8 text-file allowlist.
+- [x] Symbolic-link avoidance for project inspection and `.rocksoul` nested storage paths, plus a UTF-8 text-file allowlist.
 - [x] Human-readable witness report with observed paths, heuristics, skips, and limits.
 - [x] Explicitly confirmed `.rocksoul/` bootstrap that never overwrites existing files.
 - [x] Local mission creation, validation, Markdown record, JSON index, and guarded status transitions.

@@ -12,7 +12,7 @@ ROCKSOUL-EX has no required server, database, login, telemetry, or AI provider.
 
 1. Clone this repository and open its root folder in VS Code.
 2. Run `npm test` in the integrated terminal.
-3. Press `F5` to launch an Extension Development Host.
+3. Press `F5` and choose **ROCKSOUL-EX: Run Extension** to launch an Extension Development Host. The repository includes this debug configuration.
 4. Open a project folder in the new window.
 5. Select the ROCKSOUL-EX icon in the Activity Bar.
 6. Run **ROCKSOUL-EX: Inspect Project** from the Command Palette.
