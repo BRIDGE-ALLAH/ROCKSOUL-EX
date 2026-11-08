@@ -1,0 +1,3 @@
+{
+  "untrustedWorkspaces.description": "Read-only project inspection and local memory browsing are available in Restricted Mode. Project writes, external provider requests, patch application, and command execution require Workspace Trust."
+}
